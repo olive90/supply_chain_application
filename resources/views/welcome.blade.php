@@ -63,10 +63,10 @@
                     <tbody>
                         <?php 
                         //echo '<pre>';print_r($allData);die;
-                            $i=1;
-                            foreach ($allData as $value) {
+                            //$i=1;
+                            //foreach ($allData as $value) {
                         ?>
-                            <tr>
+                            {{-- <tr>
                                 <td>{{ $i++ }}</td>
                                 <td>{{ $value['DeliveryDate'] }}</td>
                                 <td>{{ $value['EstimatedAmount'] }}</td>
@@ -94,9 +94,9 @@
                                 <td>{{ $value['SupplierId'] }}</td>
                                 <td></td>
                             </tr>
-                        <?php
+                        <?php --}}
                                 
-                            }
+                            //}
                         ?>
                     </tbody>
                 </table>

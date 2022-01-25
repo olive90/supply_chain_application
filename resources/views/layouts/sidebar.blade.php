@@ -67,6 +67,12 @@
                       <p>Users</p>
                     </a>
                   </li>
+                  <li class="nav-item">
+                    <a href="{{ url('roles') }}" class="nav-link">
+                      <i class="fas fa-user nav-icon"></i>
+                      <p>Roles</p>
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>

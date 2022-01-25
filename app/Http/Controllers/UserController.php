@@ -8,19 +8,21 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Providers\RouteServiceProvider;
 use DB;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $userList = User::get();
+        $userList = User::orderBy('id','DESC')->paginate(5);
         //echo '<pre>';print_r($userList);die;
         return view('user.index', ['userList' => $userList]);
     }
 
     public function create()
     {
-        return view('user.create');
+        $roles = Role::pluck('name','name')->all();
+        return view('user.create', ['roles' => $roles]);
     }
 
     public function store(Request $request)
@@ -39,6 +41,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'address' => $request->address
         ]);
+        $user->assignRole($request->input('roles'));
    
         return redirect()->route('user.index')
                         ->with('success','User created successfully.');
@@ -51,22 +54,29 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $userInfo = User::find($id);
+        $user = User::find($id);
+        $roles = Role::pluck('name','name')->all();
+        $userRole = $user->roles->pluck('name','name')->all();
         // echo '<pre>';print_r($userInfo);die;
-        return view('user.edit',['user' => $userInfo]);
+        return view('user.edit',['user' => $user, 'roles' => $roles, 'userRole' => $userRole]);
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'address' => ['required', 'string']
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'address' => ['required', 'string'],
+            'roles' => ['required']
         ]);
-  
-        DB::table('users')
-            ->where('id', $id)
-            ->update(['name' => $request->name, 'email' => $request->email, 'address' => $request->address]);
+
+        $input = $request->all();
+        $user = User::find($id);
+        $user->update($input);
+
+        DB::table('model_has_roles')->where('model_id',$id)->delete();
+
+        $user->assignRole($request->input('roles'));
   
         return redirect()->route('user.index')
                         ->with('success','User updated successfully');

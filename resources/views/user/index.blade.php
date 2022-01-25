@@ -15,7 +15,7 @@
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-              <li class="breadcrumb-item active">users</li>
+              <li class="breadcrumb-item active">Users</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -65,32 +65,38 @@
                             <?php 
                             //echo '<pre>';print_r($allData);die;
                                 $i=1;
-                                foreach ($userList as $value) {
+                                foreach ($userList as $user) {
                             ?>
                                 <tr>
                                     <td>{{ $i++ }}</td>
-                                    <td>{{ $value['name'] }}</td>
-                                    <td>{{ $value['email'] }}</td>
-                                    <td>{{ $value['address'] }}</td>
-                                    <td></td>
+                                    <td>{{ $user['name'] }}</td>
+                                    <td>{{ $user['email'] }}</td>
+                                    <td>{{ $user['address'] }}</td>
                                     <td>
-                                        <?php if($value['status'] == 1){ ?>
+                                      @if(!empty($user->getRoleNames()))
+                                        @foreach($user->getRoleNames() as $v)
+                                           <label class="badge badge-success">{{ $v }}</label>
+                                        @endforeach
+                                      @endif
+                                    </td>
+                                    <td>
+                                        <?php if($user['status'] == 1){ ?>
                                         <b style="color: green;">Active</b>
                                         <?php }else{ ?>
                                             <b style="color: red;">Locked</b>
                                         <?php } ?>
                                     </td>
-                                    <td>{{ $value['created_at'] }}</td>
+                                    <td>{{ $user['created_at'] }}</td>
                                     <td>
-                                        <form action="{{ route('user.destroy',$value['id']) }}" method="POST">
+                                        <form action="{{ route('user.destroy',$user['id']) }}" method="POST">
    
-                                            <a href="{{ route('user.edit',$value['id']) }}" class="btn btn-outline-primary">
+                                            <a href="{{ route('user.edit',$user['id']) }}" class="btn btn-outline-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a> |
                            
                                             @csrf
                                             @method('DELETE')
-                                            <?php if($value['status'] == 1){ ?>
+                                            <?php if($user['status'] == 1){ ?>
                                                 <button type="submit" name="lock" class="btn btn-outline-danger"><i class="fas fa-user-lock"></i></button>
                                                 <input type="hidden" name="lock" value="lock">
                                             <?php }else{ ?>

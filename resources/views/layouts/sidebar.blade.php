@@ -52,6 +52,7 @@
                   <p>Purchase Order</p>
                 </a>
               </li>
+              @hasrole('Admin')
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-users"></i>
@@ -75,6 +76,7 @@
                   </li>
                 </ul>
               </li>
+              @endhasrole
             </ul>
           </li>
           <li class="nav-item">

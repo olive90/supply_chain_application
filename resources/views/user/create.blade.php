@@ -97,13 +97,13 @@
                                         <div class="col-xs-12 col-sm-12 col-md-12">
                                             <div class="form-group">
                                                 <strong>{{ __('Confirm Password') }}</strong>
-                                                <input id="password-confirm" type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
+                                                <input id="password-confirm" type="password" name="password_confirmation" class="form-control" required autocomplete="new-password" placeholder="Confirm Password">
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-12">
                                             <div class="form-group">
                                                 <strong>Role:</strong>
-                                                {!! Form::select('roles[]', $roles,[], array('class' => 'form-control','multiple')) !!}
+                                                {!! Form::select('roles[]', $roles,[], array('class' => 'form-control','multiple', 'id' => 'tags', 'select2 select2-hidden-accessible')) !!}
                                             </div>
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-12 text-center">
@@ -130,5 +130,3 @@
   <!-- /.content-wrapper -->
   
 @endsection
-
-

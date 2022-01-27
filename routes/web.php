@@ -17,8 +17,6 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-// Route::get('/test', 'HomeController@index');
-
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -27,4 +25,5 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('roles', RoleController::class);
     Route::resource('user', UserController::class);
     Route::resource('products', ProductController::class);
+    Route::resource('vendors', VendorController::class);
 });

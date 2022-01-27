@@ -54,6 +54,18 @@
               </li>
               @hasrole('Admin')
               <li class="nav-item">
+                <a href="{{ url('vendors') }}" class="nav-link">
+                  <i class="fas fa-arrow-alt-circle-right nav-icon"></i>
+                  <p>Vendor</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('products') }}" class="nav-link">
+                  <i class="fas fa-arrow-alt-circle-right nav-icon"></i>
+                  <p>Product</p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-users"></i>
                   <p>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Product;
+use App\Vendor;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -18,20 +19,25 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::latest()->paginate(5);
-        return view('products.index',compact('products'));
+        $products = Product::join('vendors', 'vendors.id', '=', 'products.vendor_id')
+                            ->select('products.*','vendors.name as vendor_name')
+                            ->get();
+        return view('products.index',['products' => $products]);
     }
 
     public function create()
     {
-        return view('products.create');
+        $vendors = Vendor::where('Active', 'Y')->get();
+        return view('products.create', ['vendors' => $vendors]);
     }
 
     public function store(Request $request)
     {
-        request()->validate([
-            'name' => 'required',
-            'detail' => 'required',
+        //return $request->all();
+        $this->validate($request, [
+            'name' => 'required|unique:products,name',
+            'details' => 'required',
+            'vendor_id' => 'required',
         ]);
     
         Product::create($request->all());
@@ -52,9 +58,9 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        request()->validate([
+        $this->validate($request, [
             'name' => 'required',
-            'detail' => 'required',
+            'details' => 'required',
         ]);
     
         $product->update($request->all());

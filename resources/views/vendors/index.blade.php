@@ -10,12 +10,12 @@
     <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
-        <h1 class="m-0">Products</h1>
+        <h1 class="m-0">Vendors</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-            <li class="breadcrumb-item active">Products</li>
+            <li class="breadcrumb-item active">Vendors</li>
         </ol>
         </div><!-- /.col -->
     </div><!-- /.row -->
@@ -32,12 +32,12 @@
                   <div class="card-header">
                       <div class="d-flex justify-content-between">
                           <div>
-                              <h3 class="card-title">All Products</h3>
+                              <h3 class="card-title">All Vendors</h3>
                           </div>
                           <div>
-                            @can('role-create')
-                                <a class="btn btn-outline-primary" href="{{ route('products.create') }}"> Create New</a>
-                            @endcan
+                            @hasrole('Admin')
+                                <a class="btn btn-outline-primary" href="{{ route('vendors.create') }}"> Create New</a>
+                            @endhasrole
                           </div>
                      </div>                      
                   </div>
@@ -49,14 +49,15 @@
                           </div>
                       @endif
 
-                      <?php if(isset($products) && !empty($products)){ ?>
+                      <?php if(isset($vendors) && !empty($vendors)){ ?>
                     <table id="example1" class="table table-bordered table-striped">
                       <thead>
                       <tr>
                         <th>SL</th>
                         <th>Name</th>
+                        <th>Address</th>
+                        <th>Phone Number</th>
                         <th>Details</th>
-                        <th>Vendor</th>
                         <th>Create Date</th>
                         <th>Status</th>
                         <th width="100px">Action</th>
@@ -64,32 +65,32 @@
                       </thead>
                       <tbody>
                         <?php $i=0; ?>
-                        @foreach ($products as $product)
+                        @foreach ($vendors as $vendor)
                         <tr>
                             <td>{{ ++$i }}</td>
-                            <td>{{ $product->name }}</td>
-                            <td>{{ $product->details }}</td>
-                            <td>{{ $product->vendor_name }}</td>
-                            <td>{{ $product->created_at }}</td>
-                            @if($product->Active == 'Y')
+                            <td>{{ $vendor->name }}</td>
+                            <td>{{ $vendor->address }}</td>
+                            <td>{{ $vendor->phone_number }}</td>
+                            <td>{{ $vendor->details }}</td>
+                            <td>{{ $vendor->created_at }}</td>
+                            @if($vendor->Active == 'Y')
                             <td style="color: green; font-weight: 600;">Active</td>
                             @else
                             <td style="color: red; font-weight: 600;">In Active</td>
                             @endif
                             <td>
-                                <form action="{{ route('products.destroy',$product->id) }}" method="POST">
-                                    @can('product-edit')
-                                    <a class="btn btn-outline-primary" href="{{ route('products.edit',$product->id) }}">
+                                <form action="{{ route('vendors.destroy',$vendor->id) }}" method="POST">
+                                  @hasrole('Admin')
+                                    <a class="btn btn-outline-primary" href="{{ route('vendors.edit',$vendor->id) }}">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    @endcan
-
+                                  @endhasrole
 
                                     @csrf
                                     @method('DELETE')
-                                    @can('product-delete')
+                                    @hasrole('Admin')
                                     <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
-                                    @endcan
+                                    @endhasrole
                                 </form>
                             </td>
                         </tr>

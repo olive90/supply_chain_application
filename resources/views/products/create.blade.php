@@ -64,6 +64,12 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12">
                                         <div class="form-group">
+                                            <strong>Unit Price:</strong>
+                                            <input type="text" name="unit_price" class="form-control" placeholder="Unit price in Taka">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
                                             <strong>Detail:</strong>
                                             <textarea class="form-control" style="height:150px" name="details" placeholder="Detail"></textarea>
                                         </div>

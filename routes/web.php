@@ -26,4 +26,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('user', UserController::class);
     Route::resource('products', ProductController::class);
     Route::resource('vendors', VendorController::class);
+    Route::resource('pr', PurchaseRequestController::class);
+    Route::get('product', 'PurchaseRequestController@getProduct');
+    Route::get('product_price', 'PurchaseRequestController@getProductUnitPrice');
 });

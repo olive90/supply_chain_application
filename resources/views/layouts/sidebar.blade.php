@@ -41,7 +41,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="./index2.html" class="nav-link">
+                <a href="{{ url('pr') }}" class="nav-link">
                   <i class="fas fa-arrow-alt-circle-right nav-icon"></i>
                   <p>Purchase Request</p>
                 </a>

@@ -36,6 +36,7 @@ class ProductController extends Controller
         //return $request->all();
         $this->validate($request, [
             'name' => 'required|unique:products,name',
+            'unit_price' => 'required',
             'details' => 'required',
             'vendor_id' => 'required',
         ]);
@@ -60,6 +61,7 @@ class ProductController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
+            'unit_price' => 'required',
             'details' => 'required',
         ]);
     

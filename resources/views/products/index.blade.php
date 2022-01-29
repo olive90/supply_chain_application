@@ -55,6 +55,7 @@
                       <tr>
                         <th>SL</th>
                         <th>Name</th>
+                        <th>Unit Price</th>
                         <th>Details</th>
                         <th>Vendor</th>
                         <th>Create Date</th>
@@ -68,6 +69,7 @@
                         <tr>
                             <td>{{ ++$i }}</td>
                             <td>{{ $product->name }}</td>
+                            <td>{{ $product->unit_price }} TK</td>
                             <td>{{ $product->details }}</td>
                             <td>{{ $product->vendor_name }}</td>
                             <td>{{ $product->created_at }}</td>

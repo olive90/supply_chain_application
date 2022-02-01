@@ -57,7 +57,7 @@
                         <th>Name</th>
                         <th>Unit Price</th>
                         <th>Details</th>
-                        <th>Vendor</th>
+                        <th>Category</th>
                         <th>Create Date</th>
                         <th>Status</th>
                         <th width="100px">Action</th>
@@ -71,9 +71,9 @@
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->unit_price }} TK</td>
                             <td>{{ $product->details }}</td>
-                            <td>{{ $product->vendor_name }}</td>
+                            <td>{{ $product->category_name }}</td>
                             <td>{{ $product->created_at }}</td>
-                            @if($product->Active == 'Y')
+                            @if($product->active == 'Y')
                             <td style="color: green; font-weight: 600;">Active</td>
                             @else
                             <td style="color: red; font-weight: 600;">In Active</td>

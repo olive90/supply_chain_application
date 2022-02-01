@@ -70,21 +70,21 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12">
                                         <div class="form-group">
-                                            <strong>Detail:</strong>
-                                            <textarea class="form-control" style="height:150px" name="details" placeholder="Detail"></textarea>
+                                            <strong>Category:</strong>
+                                            <select class="form-control" name="category">
+                                                <option value="">Select One</option>
+                                                <?php if(isset($categories) && !empty($categories)){ ?>
+                                                    @foreach($categories as $category)
+                                                        <option value="{{ $category['id'] }}">{{ $category['category_name'] }}</option>
+                                                    @endforeach
+                                                <?php } ?>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12">
                                         <div class="form-group">
-                                            <strong>Vendor:</strong>
-                                            <select class="form-control" name="vendor_id">
-                                                <option value="">Select One</option>
-                                                <?php if(isset($vendors) && !empty($vendors)){ ?>
-                                                    @foreach($vendors as $vendor)
-                                                        <option value="{{ $vendor['id'] }}">{{ $vendor['name'] }}</option>
-                                                    @endforeach
-                                                <?php } ?>
-                                            </select>
+                                            <strong>Detail:</strong>
+                                            <textarea class="form-control" style="height:150px" name="details" placeholder="Detail"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12 text-center">

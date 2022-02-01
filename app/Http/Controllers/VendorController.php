@@ -4,18 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Vendor;
 use Illuminate\Http\Request;
+use App\Category;
 
 class VendorController extends Controller
 {
     public function index()
     {
-        $vendors = Vendor::latest()->paginate(5);
+        $vendors = Vendor::join('categories', 'categories.id', '=', 'vendors.category')
+                            ->select('vendors.*', 'categories.category_name')
+                            ->get();
+
         return view('vendors.index',['vendors' => $vendors]);
     }
 
     public function create()
     {
-        return view('vendors.create');
+        $categories = Category::select('id', 'category_name')
+                                ->where('active', 'Y')
+                                ->orderBy('id', 'desc')
+                                ->get();
+
+        return view('vendors.create', ['categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -24,6 +33,7 @@ class VendorController extends Controller
             'name' => 'required|unique:vendors,name',
             'address' => 'required',
             'phone_number' => 'required',
+            'category' => 'required',
         ]);
     
         Vendor::create($request->all());
@@ -39,7 +49,12 @@ class VendorController extends Controller
 
     public function edit(Vendor $vendor)
     {
-        return view('vendors.edit',compact('vendor'));
+        $categories = Category::select('id', 'category_name')
+                                ->where('active', 'Y')
+                                ->orderBy('id', 'desc')
+                                ->get();
+
+        return view('vendors.edit',['vendor' => $vendor, 'categories' => $categories]);
     }
 
     public function update(Request $request, Vendor $vendor)
@@ -48,6 +63,7 @@ class VendorController extends Controller
             'name' => 'required',
             'address' => 'required',
             'phone_number' => 'required',
+            'category' => 'required',
         ]);
     
         $vendor->update($request->all());

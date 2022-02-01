@@ -72,8 +72,27 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12">
                                         <div class="form-group">
+                                            <strong>Category:</strong>
+                                            <select name="category" id="category" class="form-control">
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}" <?= $category->id==$product->category?"selected":"" ?>>{{ $category->category_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
                                             <strong>Detail:</strong>
                                             <textarea class="form-control" style="height:150px" name="details" placeholder="Detail">{{ $product->details }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <strong>Category:</strong>
+                                            <select name="active" id="active" class="form-control">
+                                                <option value="Y" <?=$product->active=='Y'?"selected":""?>>Active</option>
+                                                <option value="N" <?=$product->active=='N'?"selected":""?>>Inactive</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-12 text-center">

@@ -57,6 +57,7 @@
                         <th>Name</th>
                         <th>Address</th>
                         <th>Phone Number</th>
+                        <th>Vendor Category</th>
                         <th>Details</th>
                         <th>Create Date</th>
                         <th>Status</th>
@@ -71,9 +72,10 @@
                             <td>{{ $vendor->name }}</td>
                             <td>{{ $vendor->address }}</td>
                             <td>{{ $vendor->phone_number }}</td>
+                            <td>{{ $vendor->category_name }}</td>
                             <td>{{ $vendor->details }}</td>
                             <td>{{ $vendor->created_at }}</td>
-                            @if($vendor->Active == 'Y')
+                            @if($vendor->active == 'Y')
                             <td style="color: green; font-weight: 600;">Active</td>
                             @else
                             <td style="color: red; font-weight: 600;">In Active</td>

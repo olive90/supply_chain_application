@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Product;
 use App\Vendor;
+use App\Category;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -19,26 +20,30 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::join('vendors', 'vendors.id', '=', 'products.vendor_id')
-                            ->select('products.*','vendors.name as vendor_name')
+        $products = Product::join('categories', 'categories.id', '=', 'products.category')
+                            ->select('products.*','categories.category_name')
                             ->get();
+
         return view('products.index',['products' => $products]);
     }
 
     public function create()
     {
-        $vendors = Vendor::where('Active', 'Y')->get();
-        return view('products.create', ['vendors' => $vendors]);
+        $categories = Category::select('id', 'category_name')
+                                ->where('active', 'Y')
+                                ->orderBy('id', 'desc')
+                                ->get();
+
+        return view('products.create', ['categories' => $categories]);
     }
 
     public function store(Request $request)
     {
-        //return $request->all();
         $this->validate($request, [
             'name' => 'required|unique:products,name',
             'unit_price' => 'required',
             'details' => 'required',
-            'vendor_id' => 'required',
+            'category' => 'required',
         ]);
     
         Product::create($request->all());
@@ -54,7 +59,12 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('products.edit',compact('product'));
+        $categories = Category::select('id', 'category_name')
+                                ->where('active', 'Y')
+                                ->orderBy('id', 'desc')
+                                ->get();
+
+        return view('products.edit',['product' => $product, 'categories' => $categories]);
     }
 
     public function update(Request $request, Product $product)
@@ -63,6 +73,7 @@ class ProductController extends Controller
             'name' => 'required',
             'unit_price' => 'required',
             'details' => 'required',
+            'category' => 'required',
         ]);
     
         $product->update($request->all());

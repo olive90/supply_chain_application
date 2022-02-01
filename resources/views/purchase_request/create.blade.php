@@ -2,6 +2,12 @@
 @extends('layouts.sidebar')
 @extends('layouts.navbar')
 
+<style>
+    .required{
+        color: red;
+    }
+</style>
+
 @section('content')
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -51,13 +57,13 @@
                           </div>
                       @endif
                       <div class="col-md-12">
-                            <form action="{{ route('products.store') }}" method="POST">
+                            <form action="{{ route('pr.store') }}" method="POST">
                                 @csrf
                                  <div class="row">
                                     <div class="col-md-6">
                                         <div class="col-xs-12 col-sm-12 col-md-12" style="padding-left: 0px !important;">
                                             <div class="form-group">
-                                                <strong>Category:</strong>
+                                                <strong><span class="required">*</span> Category:</strong>
                                                 <select class="form-control" name="category">
                                                     <option value="">Select One</option>
                                                     <?php if(isset($categories) && !empty($categories)){ ?>
@@ -66,14 +72,15 @@
                                                         @endforeach
                                                     <?php } ?>
                                                 </select>
+                                                <input type="hidden" name="category" id="category">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="col-xs-12 col-sm-12 col-md-12" style="padding-left: 0px !important;">
                                             <div class="form-group">
-                                                <strong>Expected Delivery Date:</strong>
-                                                <input type="date" name="pr_date" value="<?=date('m-d-Y');?>" class="form-control">
+                                                <strong><span class="required">*</span> Expected Delivery Date:</strong>
+                                                <input type="date" name="expected_delivery_date" value="<?=date('m-d-Y');?>" class="form-control">
                                             </div>
                                         </div>
                                     </div>
@@ -88,16 +95,16 @@
                                         <div class="row">
                                             <div class="col-xs-4 col-sm-4 col-md-4" style="float: left;">
                                                 <div class="form-group">
-                                                    <strong>Product/Item:</strong>
-                                                    <select class="form-control" name="product" onchange="getPrice(this, this.value)">
+                                                    <strong><span class="required">*</span> Product/Item:</strong>
+                                                    <select class="form-control product" name="product[]" onchange="getPrice(this, this.value)">
                                                         <option value="">Select One</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
                                                 <div class="form-group">
-                                                    <strong>Qty:</strong>
-                                                    <input type="text" class="form-control" name="qty" id="qty">
+                                                    <strong><span class="required">*</span> Qty:</strong>
+                                                    <input type="text" class="form-control qty" name="qty[]" id="qty">
                                                 </div>
                                             </div>
                                             {{-- <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
@@ -134,7 +141,7 @@
                                         <div class="row">
                                             <div class="col-xs-6 col-sm-6 col-md-6">
                                                 <div class="form-group">
-                                                    <strong>Address 1:</strong>
+                                                    <strong><span class="required">*</span> Address 1:</strong>
                                                     <input type="text" name="address1" class="form-control" placeholder="Address Line 1">
                                                 </div>
                                             </div>
@@ -152,11 +159,22 @@
                                         <div class="row">
                                             <div class="col-xs-6 col-sm-6 col-md-6">
                                                 <div class="form-group">
-                                                    <strong>Phone:</strong>
+                                                    <strong><span class="required">*</span> Phone:</strong>
                                                     <input type="text" name="phone" class="form-control" placeholder="Phone Number">
                                                 </div>
                                             </div>
                                             <div class="col-xs-6 col-sm-6 col-md-6"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <strong>Purpose:</strong>
+                                                    <input type="text" class="form-control" name="purpose" placeholder="Purpose of purchase request">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -165,7 +183,7 @@
                                             <div class="col-xs-8 col-sm-8 col-md-8">
                                                 <div class="form-group">
                                                     <strong>Special Ordering Instructions:</strong>
-                                                    <textarea name="instructions" class="form-control" placeholder="Special Ordering Instructions"></textarea>
+                                                    <textarea name="ordering_instructions" class="form-control" placeholder="Special Ordering Instructions"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -176,7 +194,7 @@
                                             <div class="col-xs-8 col-sm-8 col-md-8">
                                                 <div class="form-group">
                                                     <strong>Shipping Instructions:</strong>
-                                                    <textarea name="instructions" class="form-control" placeholder="Shipping Instructions"></textarea>
+                                                    <textarea name="shipping_instructions" class="form-control" placeholder="Shipping Instructions"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -208,7 +226,7 @@
         <div class="col-xs-4 col-sm-4 col-md-4" style="float: left;">
             <div class="form-group">
                 <strong>Product/Item:</strong>
-                <select class="form-control" name="product" onchange="getPrice(this, this.value)">
+                <select class="form-control product" name="product[]" onchange="getPrice(this, this.value)">
                     <option value="">Select One</option>
                 </select>
             </div>
@@ -216,7 +234,7 @@
         <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
             <div class="form-group">
                 <strong>Qty:</strong>
-                <input type="text" class="form-control" name="qty" id="qty">
+                <input type="text" class="form-control qty" name="qty[]" id="qty">
             </div>
         </div>
         {{-- <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
@@ -270,17 +288,18 @@
                 dataType: 'Json',
                 data: {'categoryId':categoryId},
                 success: function(data) {
+                    $("#category").val(categoryId);
                     $("select[name='category']").prop('disabled',true);
-                    $('select[name="product"]').empty();
+                    $('.product').empty();
                     html = '<option value="">Select Product</option>';
                     $.each(data, function(key, value) {
                         html += '<option value="'+ value.id +'">'+ value.name +'</option>';
                     });
-                    $('select[name="product"]').append(html);
+                    $('.product').append(html);
                 }
             });
         }else{
-            $('select[name="product"]').empty();
+            $('.product"]').empty();
         }
 
         });

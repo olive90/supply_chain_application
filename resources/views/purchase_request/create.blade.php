@@ -171,7 +171,7 @@
                                         <div class="row">
                                             <div class="col-xs-6 col-sm-6 col-md-6">
                                                 <div class="form-group">
-                                                    <strong>Purpose:</strong>
+                                                    <strong><span class="required">*</span> Purpose:</strong>
                                                     <input type="text" class="form-control" name="purpose" placeholder="Purpose of purchase request">
                                                 </div>
                                             </div>

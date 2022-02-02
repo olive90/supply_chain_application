@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use App\PurchaseRequestMaster;
 use App\PurchaseRequestDetails;
+use Illuminate\Support\Facades\Http;
 
 class PurchaseRequestController extends Controller
 {
@@ -22,9 +23,26 @@ class PurchaseRequestController extends Controller
         $this->middleware('permission:pr-delete', ['only' => ['destroy']]);
     }
     
-    public function index()
+    public function index(Request $request)
     {
-        return view('purchase_request.index');
+        //return 'hi';
+        // $response = Http::post('localhost:3000/queryblock', [
+        //     'key' => '1'
+        // ]);
+        // Http::fake();
+        $data = array();
+        $response = Http::get('localhost:3000/getblocks');
+        $data = $response->json();
+        
+        $allData = $data['AllData'];
+        for($i=0; $i<count($allData); $i++){
+            if($allData[$i]['Key']=='PRId' || $allData[$i]['Key']=='test'){
+                unset($allData[$i]);
+            }
+            $allData = array_values($allData);
+        }
+        
+        return view('purchase_request.index', ['allData' => $allData]);
     }
 
     public function create()
@@ -41,9 +59,11 @@ class PurchaseRequestController extends Controller
             'expected_delivery_date' => 'required',
             'address1' => 'required',
             'phone' => 'required',
+            'purpose' => 'required',
         ]);
 
         $pr_id = Str::random(10);
+        $pr_no = rand(99999999, 10000000);
         $prMaster = new PurchaseRequestMaster();
         $prMaster->pr_id = $pr_id;
         $prMaster->category = $request->category;
@@ -66,9 +86,42 @@ class PurchaseRequestController extends Controller
             }
             $prDetails->insert($prepareData);
         }
-    
-        return redirect()->route('pr.index')
-                        ->with('success','Purchase request submited successfully.');
+
+        $response = Http::post('localhost:3000/writews', [
+            'Id' => $pr_id,
+            "DeliveryDate" => "",
+            "EstimatedAmount" => "",
+            "EstimatedCost" => "",
+            "EstimatedTotalCost" => "",
+            "ItemId" => "",
+            'OrderDate' => "",
+            "OrderedItemCost" => "",
+            "OrderedQuantity" => "",
+            "OrderedTotalCost" => "",
+            "POApprovedBy" => "",
+            "POApprovedDate" => "",
+            "PONo" => "",
+            "PORequestedBy" => "",
+            "PORequestedDate" => "",
+            "POStatus" => "",
+            "PRApprovedBy" => "",
+            "PRApprovedDate" => "",
+            "PRNo" => $pr_no,
+            "PRPurpose" => $request->purpose,
+            "PRRequestDate" => date('Y-m-d H:i:s'),
+            "PRRequestedBy" => $request->user()->id,
+            "PRStatus" => "1",                            //initial request
+            "SupplierAddress" => $request->address1 . '#' . $request->address2,
+            "SupplierId" => $request->phone
+        ]);
+
+        if($response){
+            return redirect()->route('pr.index')
+                            ->with('success','Purchase request submited successfully.');
+        }else{
+            return redirect()->route('pr.index')
+                            ->with('error','Something went wrong. Please try again later.');
+        }
     }
 
     public function show(PurchaseRequest $purchaseRequest)

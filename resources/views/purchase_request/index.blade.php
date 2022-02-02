@@ -48,8 +48,58 @@
                               <p>{{ $message }}</p>
                           </div>
                       @endif
-
-                      
+                    <div class="row table-responsive">
+                        <table class="table table-bordered data-table">
+                            <thead>
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>PRNo</th>
+                                    <th>PR Purpose</th>
+                                    <th>Request Date & Time</th>
+                                    <th>PR Status</th>
+                                    <th width="100px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                // echo '<pre>';print_r($allData);die;
+                                    $i=1;
+                                    foreach ($allData as $value) {
+                                ?>
+                                    <tr>
+                                        <td>{{ $i++ }}</td>
+                                        <td>{{ $value['Record']['PRNo'] }}</td>
+                                        <td>{{ $value['Record']['PRPurpose'] }}</td>
+                                        <td>{{ $value['Record']['PRRequestDate'] }}</td>
+                                        @if ($value['Record']['PRStatus'] == 1)
+                                            <td style="color: green; font-weight: 600;">Processing</td>
+                                        @else
+                                            <td style="color: red; font-weight: 600;">InActive</td>
+                                        @endif
+                                        <td>
+                                            <form action="{{ route('products.destroy',$value['Key']) }}" method="POST">
+                                                
+                                                <a class="btn btn-outline-primary" href="{{ route('products.edit',$value['Key']) }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                
+            
+            
+                                                @csrf
+                                                @method('DELETE')
+                                                
+                                                <button type="submit" class="btn btn-outline-warning"><i class="fas fa-eye"></i></button>
+                                                
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php
+                                        
+                                    }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                   </div>
                   <!-- /.card-body -->
           </div>

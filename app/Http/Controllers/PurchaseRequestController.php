@@ -41,6 +41,24 @@ class PurchaseRequestController extends Controller
             }
             $allData = array_values($allData);
         }
+
+        for($i=0; $i<count($allData); $i++){
+            $a  = array_search('BlockFor', $allData[$i]['Record']);
+            if($a == true){
+                unset($allData[$i]);
+            }
+            $allData = array_values($allData);
+        }
+
+        for($i=0; $i<count($allData); $i++){
+            $b  = array_search('quotation', $allData[$i]['Record']);
+            if($b == true){
+                unset($allData[$i]);
+            }
+            $allData = array_values($allData);
+        }
+
+        // echo '<pre>';print_r($allData);die;
         
         return view('purchase_request.index', ['allData' => $allData]);
     }
@@ -124,9 +142,41 @@ class PurchaseRequestController extends Controller
         }
     }
 
-    public function show(PurchaseRequest $purchaseRequest)
+    public function show($pr_key)
     {
-        //
+        $key = base64_decode($pr_key);
+        $data = array();
+        $response = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+        $data = $response->json();
+        
+        // $allData = $data['AllData'];
+        // for($i=0; $i<count($allData); $i++){
+        //     if($allData[$i]['Key']=='PRId' || $allData[$i]['Key']=='test'){
+        //         unset($allData[$i]);
+        //     }
+        //     $allData = array_values($allData);
+        // }
+
+        // for($i=0; $i<count($allData); $i++){
+        //     $a  = array_search('BlockFor', $allData[$i]['Record']);
+        //     if($a == true){
+        //         unset($allData[$i]);
+        //     }
+        //     $allData = array_values($allData);
+        // }
+
+        // for($i=0; $i<count($allData); $i++){
+        //     $b  = array_search('quotation', $allData[$i]['Record']);
+        //     if($b == true){
+        //         unset($allData[$i]);
+        //     }
+        //     $allData = array_values($allData);
+        // }
+
+        echo '<pre>';print_r($data);die;
+        
+        return view('purchase_request.index', ['allData' => $allData]);
+        
     }
 
     public function edit(PurchaseRequest $purchaseRequest)

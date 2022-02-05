@@ -10,12 +10,12 @@
     <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
-        <h1 class="m-0">Purchase Request</h1>
+        <h1 class="m-0">Purchase Request Details</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-            <li class="breadcrumb-item active">Purchase Request</li>
+            <li class="breadcrumb-item active">Purchase Request Details</li>
         </ol>
         </div><!-- /.col -->
     </div><!-- /.row -->
@@ -32,12 +32,7 @@
                   <div class="card-header">
                       <div class="d-flex justify-content-between">
                           <div>
-                              <h3 class="card-title">All Purchase Request</h3>
-                          </div>
-                          <div>
-                            @hasrole('User')
-                                <a class="btn btn-outline-primary" href="{{ route('pr.create') }}"> Make New Request</a>
-                            @endhasrole
+                              <h3 class="card-title">Details</h3>
                           </div>
                      </div>                      
                   </div>
@@ -48,6 +43,9 @@
                               <p>{{ $message }}</p>
                           </div>
                       @endif
+                    <div class="row">
+                        
+                    </div>
                     <div class="row table-responsive">
                         <?php if(isset($allData) && !empty($allData)){ ?>
                         <table class="table table-bordered data-table">

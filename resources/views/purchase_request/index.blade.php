@@ -48,6 +48,11 @@
                               <p>{{ $message }}</p>
                           </div>
                       @endif
+                      @if ($message = Session::get('error'))
+                          <div class="alert alert-danger">
+                              <p>{{ $message }}</p>
+                          </div>
+                      @endif
                     <div class="row table-responsive">
                         <?php if(isset($allData) && !empty($allData)){ ?>
                         <table class="table table-bordered data-table">

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Providers\RouteServiceProvider;
 use DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Http;
 
 class UserController extends Controller
 {
@@ -35,13 +36,15 @@ class UserController extends Controller
         ]);
         //return $request;
   
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'address' => $request->address
         ]);
         $user->assignRole($request->input('roles'));
+
+        Http::post('localhost:3000/registeruser', ["username"=>$request->name]);
    
         return redirect()->route('user.index')
                         ->with('success','User created successfully.');
@@ -74,9 +77,13 @@ class UserController extends Controller
         $user = User::find($id);
         $user->update($input);
 
+        // return $user;
+
         DB::table('model_has_roles')->where('model_id',$id)->delete();
 
         $user->assignRole($request->input('roles'));
+
+        Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
   
         return redirect()->route('user.index')
                         ->with('success','User updated successfully');

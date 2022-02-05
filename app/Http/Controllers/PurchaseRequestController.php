@@ -71,7 +71,6 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
-        //return $request->all();
         $this->validate($request, [
             'category' => 'required',
             'expected_delivery_date' => 'required',
@@ -82,36 +81,18 @@ class PurchaseRequestController extends Controller
 
         $pr_id = Str::random(10);
         $pr_no = rand(99999999, 10000000);
-        $prMaster = new PurchaseRequestMaster();
-        $prMaster->pr_id = $pr_id;
-        $prMaster->category = $request->category;
-        $prMaster->special_ordering_instructions = $request->ordering_instructions;
-        $prMaster->shipping_instructions = $request->shipping_instructions;
-        $prMaster->request_by = $request->user()->id;
-        $prMaster->status = 1;
-        $prMaster->save();
-
-        $prDetails = new PurchaseRequestDetails();
-
-        if(count($request->product)>0){
-            $prepareData = array();
-            foreach($request->product as $key => $productid){
-                foreach($request->qty as $q => $qtyid){
-                    $prepareData[$q]['pr_id'] = $pr_id;
-                    $prepareData[$q]['product'] = $productid;
-                    $prepareData[$q]['qty'] = $qtyid;
-                }
-            }
-            $prDetails->insert($prepareData);
-        }
 
         $response = Http::post('localhost:3000/writews', [
-            'Id' => $pr_id,
+            "user" => $request->user()->name,
+            "Id" => $pr_id,
             "DeliveryDate" => "",
-            "EstimatedAmount" => "",
-            "EstimatedCost" => "",
-            "EstimatedTotalCost" => "",
+            "DeliveredDate" => "",
+            "DeliveryAddress" => "Address Line 1 : ".$request->address1 . "Address Line 2 : " . $request->address2,
             "ItemId" => "",
+            "VendorEstdCost" => "",
+            "PREstdQuantity" => "",
+            "VendorEstdTotalCost" => "",
+            "VendorQuotedate" => "",
             'OrderDate' => "",
             "OrderedItemCost" => "",
             "OrderedQuantity" => "",
@@ -127,13 +108,41 @@ class PurchaseRequestController extends Controller
             "PRNo" => $pr_no,
             "PRPurpose" => $request->purpose,
             "PRRequestDate" => date('Y-m-d H:i:s'),
-            "PRRequestedBy" => $request->user()->id,
+            "PRRequestedBy" => $request->user()->name,
             "PRStatus" => "1",                            //initial request
-            "SupplierAddress" => $request->address1 . '#' . $request->address2,
-            "SupplierId" => $request->phone
+            "SupplierAddress" => "",
+            "SupplierId" => $request->phone,
+            "GenStatus" => ""
         ]);
 
-        if($response){
+        $resp = json_decode($response, true);
+        $resultResponse = empty($resp) ? '001' : $resp;
+
+        if($resultResponse != '001'){
+
+            $prMaster = new PurchaseRequestMaster();
+            $prMaster->pr_id = $pr_id;
+            $prMaster->category = $request->category;
+            $prMaster->special_ordering_instructions = $request->ordering_instructions;
+            $prMaster->shipping_instructions = $request->shipping_instructions;
+            $prMaster->request_by = $request->user()->id;
+            $prMaster->status = 1;
+            $prMaster->save();
+
+            $prDetails = new PurchaseRequestDetails();
+
+            if(count($request->product)>0){
+                $prepareData = array();
+                foreach($request->product as $key => $productid){
+                    foreach($request->qty as $q => $qtyid){
+                        $prepareData[$q]['pr_id'] = $pr_id;
+                        $prepareData[$q]['product'] = $productid;
+                        $prepareData[$q]['qty'] = $qtyid;
+                    }
+                }
+                $prDetails->insert($prepareData);
+            }
+            
             return redirect()->route('pr.index')
                             ->with('success','Purchase request submited successfully.');
         }else{

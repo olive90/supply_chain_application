@@ -84,19 +84,19 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-12" style="padding-left: 0px !important;">
+                                    {{-- <div class="col-md-12" style="padding-left: 0px !important;">
                                         <br>
                                         <div class="col-md-4">
                                             <input class="btn btn-outline-success" type="button" name="" id="add" value="Add More Product/Item">
                                         </div>
                                         <br>
-                                    </div>
+                                    </div> --}}
                                     <div class="col-xs-12 col-sm-12 col-md-12" id="product">
                                         <div class="row">
                                             <div class="col-xs-4 col-sm-4 col-md-4" style="float: left;">
                                                 <div class="form-group">
                                                     <strong><span class="required">*</span> Product/Item:</strong>
-                                                    <select class="form-control product" name="product[]" onchange="getPrice(this, this.value)">
+                                                    <select class="form-control product" name="product" onchange="getPrice(this, this.value)">
                                                         <option value="">Select One</option>
                                                     </select>
                                                 </div>
@@ -104,36 +104,9 @@
                                             <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
                                                 <div class="form-group">
                                                     <strong><span class="required">*</span> Qty:</strong>
-                                                    <input type="text" class="form-control qty" name="qty[]" id="qty">
+                                                    <input type="text" class="form-control qty" name="qty" id="qty">
                                                 </div>
                                             </div>
-                                            {{-- <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
-                                                <div class="form-group">
-                                                    <strong>Per Unit Price:</strong>
-                                                    <input type="text" class="form-control unit_price" name="unit_price" id="unit_price">
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
-                                                <div class="form-group">
-                                                    <strong>Total Price:</strong>
-                                                    <input type="text" class="form-control" name="total_price" id="total_price">
-                                                </div>
-                                            </div>
-                                        </div>
-    
-                                        <div class="col-md-12">
-                                            <div class="row">
-                                                <div class="col-xs-4 col-sm-4 col-md-4"></div>
-                                                <div class="col-xs-2 col-sm-2 col-md-2"></div>
-                                                <div class="col-xs-2 col-sm-2 col-md-2"></div>
-                                                <div class="col-xs-2 col-sm-2 col-md-2">
-                                                    <div class="form-group">
-                                                        <strong>Grand Total:</strong>
-                                                        <input type="text" class="form-control" value="0" name="grand_total" id="grand_total">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div> --}}
                                         </div>
                                     </div>
                                     

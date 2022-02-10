@@ -32,7 +32,7 @@
                   <div class="card-header">
                       <div class="d-flex justify-content-between">
                           <div>
-                              <h3 class="card-title">All Purchase Request</h3>
+                              <h3 class="card-title">Purchase Request Summary</h3>
                           </div>
                           <div>
                             @hasrole('User')
@@ -60,10 +60,13 @@
                                 <tr>
                                     <th>SL#</th>
                                     <th>PRNo</th>
-                                    <th>PR Purpose</th>
+                                    <th>Purpose</th>
+                                    <th>Requested By</th>
                                     <th>Request Date & Time</th>
-                                    <th>PR Status</th>
-                                    <th width="100px">Action</th>
+                                    <th>Expected Delivery Date</th>
+                                    <th>Status</th>
+                                    <th>Supplier Quotation Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,26 +84,20 @@
                                             </a>
                                         </td>
                                         <td>{{ $value['Record']['PRPurpose'] }}</td>
+                                        <td>{{ $value['Record']['PRRequestedBy'] }}</td>
                                         <td>{{ $value['Record']['PRRequestDate'] }}</td>
+                                        <td>{{ $value['Record']['DeliveryDate'] }}</td>
                                         @if ($value['Record']['PRStatus'] == 1)
-                                            <td style="color: green; font-weight: 600;">Processing</td>
+                                            <td style="color: red; font-weight: 600;">Pending Approval</td>
                                         @else
-                                            <td style="color: red; font-weight: 600;">InActive</td>
+                                            <td style="color: green; font-weight: 600;">Approved</td>
                                         @endif
-                                        <td>
-                                            <form action="{{ route('products.destroy', $pr_key) }}" method="POST">
-                                                
-                                                <a class="btn btn-outline-primary" href="{{ route('products.edit', $pr_key) }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                
-                                                @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-outline-warning"><i class="fas fa-eye"></i></button>
-                                                
-                                            </form>
-                                        </td>
+                                        @if (empty($value['Record']['VendorEstdCost']))
+                                            <td style="color: rgb(255, 102, 0); font-weight: 600;">No quotation</td>
+                                            @else
+                                            <td style="color: rgb(21, 218, 21); font-weight: 600;">Quoted</td>
+                                        @endif
+                                        <td><button class="btn btn-outline-danger">Cancel</button></td>
                                     </tr>
                                 <?php
                                         }

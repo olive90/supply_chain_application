@@ -43,63 +43,107 @@
                               <p>{{ $message }}</p>
                           </div>
                       @endif
+                    
                     <div class="row">
-                        
-                    </div>
-                    <div class="row table-responsive">
-                        <?php if(isset($allData) && !empty($allData)){ ?>
-                        <table class="table table-bordered data-table">
-                            <thead>
-                                <tr>
-                                    <th>SL#</th>
-                                    <th>PRNo</th>
-                                    <th>PR Purpose</th>
-                                    <th>Request Date & Time</th>
-                                    <th>PR Status</th>
-                                    <th width="100px">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                // echo '<pre>';print_r($allData);die;
-                                    $i=1;
-                                    foreach ($allData as $value) {
-                                        $pr_key = base64_encode($value['Key']);
-                                ?>
-                                    <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>
-                                            <a href="{{ route('pr.show', $pr_key) }}" target="_blank">
-                                                {{ $value['Record']['PRNo'] }}
-                                            </a>
-                                        </td>
-                                        <td>{{ $value['Record']['PRPurpose'] }}</td>
-                                        <td>{{ $value['Record']['PRRequestDate'] }}</td>
-                                        @if ($value['Record']['PRStatus'] == 1)
-                                            <td style="color: green; font-weight: 600;">Processing</td>
-                                        @else
-                                            <td style="color: red; font-weight: 600;">InActive</td>
-                                        @endif
-                                        <td>
-                                            <form action="{{ route('products.destroy', $pr_key) }}" method="POST">
-                                                
-                                                <a class="btn btn-outline-primary" href="{{ route('products.edit', $pr_key) }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                
-                                                @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-outline-warning"><i class="fas fa-eye"></i></button>
-                                                
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php
-                                        }
-                                ?>
-                            </tbody>
-                        </table>
+                        <?php if(isset($reqinfo) && !empty($reqinfo)){ 
+                            $address = explode(',', $reqinfo['PurchaseOrder']['DeliveryAddress']);
+                            // echo '<pre>';print_r($address);die;
+                            ?>
+                            <div class="col-md-12">
+                                <h4><u> #Request Info</u></h4>
+                                <div class="row">
+                                    <div class="col-xs-6 col-sm-6 col-md-6">
+                                        <table class="table">
+                                            <tbody>
+                                              <tr>
+                                                <th scope="row">PRNo</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRNo'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Request Date & Time</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRRequestDate'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Request By</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRRequestedBy'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Purpose</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRPurpose'] }}</td>
+                                              </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="col-xs-6 col-sm-6 col-md-6">
+                                        <table class="table">
+                                            <tbody>
+                                              <tr>
+                                                <th scope="row">Address Line 1</th>
+                                                <td>{{ $address[0] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Address Line 2</th>
+                                                <td>{{ $address[1] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Contact Number</th>
+                                                <td>{{ $address[2] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Request Status</th>
+                                                @if ($reqinfo['PurchaseOrder']['PRStatus'] == 1)
+                                                    <td style="color: red; font-weight: 600;">Pending Approval</td>
+                                                @else
+                                                    <td style="color: green; font-weight: 600;">Approved</td>
+                                                @endif
+                                              </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <h4><u> #Product/Item Details</u></h4>
+                                    <table class="table table-bordered data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>SL#</th>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Details</th>
+                                                <th>Category</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            // echo '<pre>';print_r($allData);die;
+                                                $i=1;
+                                                foreach ($productinfo as $value) {
+                                            ?>
+                                                <tr>
+                                                    <td>{{ $i++ }}</td>
+                                                    <td>{{ $value['name'] }}</td>
+                                                    <td>{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}</td>
+                                                    <td>{{ $value['details'] }}</td>
+                                                    <td>{{ $value['category_name'] }}</td>
+                                                </tr>
+                                            <?php
+                                                    }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <h4><u> #Vendor/Supplier Quotation</u></h4>
+                                <div class="row">
+
+                                </div>
+                            </div>
                         <?php }else{ ?>
                             <div class="text-center"><h4 style="color: red;">No Data Found</h4></div>
                         <?php } ?>

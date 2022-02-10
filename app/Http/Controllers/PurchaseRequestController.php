@@ -25,11 +25,6 @@ class PurchaseRequestController extends Controller
     
     public function index(Request $request)
     {
-        //return 'hi';
-        // $response = Http::post('localhost:3000/queryblock', [
-        //     'key' => '1'
-        // ]);
-        // Http::fake();
         $data = array();
         $response = Http::get('localhost:3000/getblocks');
         $data = $response->json();
@@ -77,20 +72,22 @@ class PurchaseRequestController extends Controller
             'address1' => 'required',
             'phone' => 'required',
             'purpose' => 'required',
+            'product' => 'required',
+            'qty' => 'required',
         ]);
 
-        $pr_id = Str::random(10);
-        $pr_no = rand(99999999, 10000000);
+        $pr_id = round(microtime(true) * 1000);
+        $pr_no = 'PR' . rand(9999999999, 1000000000);
 
         $response = Http::post('localhost:3000/writews', [
             "user" => $request->user()->name,
             "Id" => $pr_id,
-            "DeliveryDate" => "",
+            "DeliveryDate" => $request->expected_delivery_date,
             "DeliveredDate" => "",
-            "DeliveryAddress" => "Address Line 1 : ".$request->address1 . "Address Line 2 : " . $request->address2,
-            "ItemId" => "",
+            "DeliveryAddress" => $request->address1 . "," . $request->address2 . "," . $request->phone,
+            "ItemId" => $request->product,
             "VendorEstdCost" => "",
-            "PREstdQuantity" => "",
+            "PREstdQuantity" => $request->qty,
             "VendorEstdTotalCost" => "",
             "VendorQuotedate" => "",
             'OrderDate' => "",
@@ -111,8 +108,8 @@ class PurchaseRequestController extends Controller
             "PRRequestedBy" => $request->user()->name,
             "PRStatus" => "1",                            //initial request
             "SupplierAddress" => "",
-            "SupplierId" => $request->phone,
-            "GenStatus" => ""
+            "SupplierId" => "",
+            "GenStatus" => "1"
         ]);
 
         $resp = json_decode($response, true);
@@ -128,20 +125,6 @@ class PurchaseRequestController extends Controller
             $prMaster->request_by = $request->user()->id;
             $prMaster->status = 1;
             $prMaster->save();
-
-            $prDetails = new PurchaseRequestDetails();
-
-            if(count($request->product)>0){
-                $prepareData = array();
-                foreach($request->product as $key => $productid){
-                    foreach($request->qty as $q => $qtyid){
-                        $prepareData[$q]['pr_id'] = $pr_id;
-                        $prepareData[$q]['product'] = $productid;
-                        $prepareData[$q]['qty'] = $qtyid;
-                    }
-                }
-                $prDetails->insert($prepareData);
-            }
             
             return redirect()->route('pr.index')
                             ->with('success','Purchase request submited successfully.');
@@ -157,35 +140,14 @@ class PurchaseRequestController extends Controller
         $data = array();
         $response = Http::post('localhost:3000/queryblock', ["key"=>$key]);
         $data = $response->json();
-        
-        // $allData = $data['AllData'];
-        // for($i=0; $i<count($allData); $i++){
-        //     if($allData[$i]['Key']=='PRId' || $allData[$i]['Key']=='test'){
-        //         unset($allData[$i]);
-        //     }
-        //     $allData = array_values($allData);
-        // }
 
-        // for($i=0; $i<count($allData); $i++){
-        //     $a  = array_search('BlockFor', $allData[$i]['Record']);
-        //     if($a == true){
-        //         unset($allData[$i]);
-        //     }
-        //     $allData = array_values($allData);
-        // }
+        $productInfo = Product::join('categories', 'categories.id', '=', 'products.category')
+                                ->where('products.id', $data['PurchaseOrder']['ItemId'])
+                                ->get();
 
-        // for($i=0; $i<count($allData); $i++){
-        //     $b  = array_search('quotation', $allData[$i]['Record']);
-        //     if($b == true){
-        //         unset($allData[$i]);
-        //     }
-        //     $allData = array_values($allData);
-        // }
-
-        echo '<pre>';print_r($data);die;
+        // echo '<pre>';print_r($data);die;
         
-        return view('purchase_request.index', ['allData' => $allData]);
-        
+        return view('purchase_request.pr_details', ['reqinfo' => $data, 'productinfo' => $productInfo]);   
     }
 
     public function edit(PurchaseRequest $purchaseRequest)

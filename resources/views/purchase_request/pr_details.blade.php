@@ -98,8 +98,10 @@
                                                 <th scope="row">Request Status:</th>
                                                 @if ($reqinfo['PurchaseOrder']['PRStatus'] == 1)
                                                     <td style="color: red; font-weight: 600;">Pending Approval</td>
-                                                @else
+                                                @elseif($reqinfo['PurchaseOrder']['PRStatus'] == 2)
                                                     <td style="color: green; font-weight: 600;">Approved</td>
+                                                @elseif($reqinfo['PurchaseOrder']['PRStatus'] == 3)
+                                                    <td style="color: red; font-weight: 600;">Cancelled</td>
                                                 @endif
                                               </tr>
                                               <tr>
@@ -129,7 +131,9 @@
                                             <?php 
                                             // echo '<pre>';print_r($allData);die;
                                                 $i=1;
+                                                $p_name = '';
                                                 foreach ($productinfo as $value) {
+                                                    $p_name = $value['name'];
                                             ?>
                                                 <tr>
                                                     <td>{{ $i++ }}</td>
@@ -149,7 +153,104 @@
                             <div class="col-md-12">
                                 <h4><u> #Vendor/Supplier Quotation</u></h4>
                                 <div class="row">
+                                    @hasrole('Vendor')
+                                    @if (empty($reqinfo['PurchaseOrder']['SupplierId']))
+                                    <div class="col-md-4">
+                                        <form action="{{ route('pr.update', Request::segment(2)) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="pr_quote" value="pr_quote">
+                                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group">
+                                                    <strong>Product Name</strong>
+                                                    <input type="text" name="p_name" class="form-control" value="{{ $p_name }}" readonly>
+                                                </div>
+                                            </div>
+        
+                                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group">
+                                                    <strong>Quantity</strong>
+                                                    <input type="text" name="qty" class="form-control" value="{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}" readonly>
+                                                </div>
+                                            </div>
 
+                                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group">
+                                                    <strong>Per Unit Cost</strong>
+                                                    <input type="text" name="unit_cost" class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group">
+                                                    <strong>Total Cost</strong>
+                                                    <input type="text" name="total_cost" class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+                                                <button type="submit" class="btn btn-outline-primary">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4"></div>
+                                    @else
+                                    <table class="table table-bordered data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Per Unit Cost</th>
+                                                <th>Total Cost</th>
+                                                <th>Quotation Submitted By</th>
+                                                <th>Quotation Submitted Date</th>
+                                                <th>Supplier Address</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ $p_name }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorEstdCost'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorEstdTotalCost'] }}</td>
+                                                <td>{{ $vendorinfo->name }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorQuotedate'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['SupplierAddress'] }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    @endif
+                                    @endhasrole
+                                    @hasanyrole('Checker|User')
+                                    @if (!empty($reqinfo['PurchaseOrder']['SupplierId']))
+                                    <table class="table table-bordered data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Per Unit Cost</th>
+                                                <th>Total Cost</th>
+                                                <th>Quotation Submitted By</th>
+                                                <th>Quotation Submitted Date</th>
+                                                <th>Supplier Address</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ $p_name }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorEstdCost'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorEstdTotalCost'] }}</td>
+                                                <td>{{ $vendorinfo->name }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['VendorQuotedate'] }}</td>
+                                                <td>{{ $reqinfo['PurchaseOrder']['SupplierAddress'] }}</td>
+                                            </tr>
+                                    </tbody>
+                                    @else
+                                    <div class="col-md-12 text-center"><strong style="color: red;">No Quotation Found</strong></div>
+                                    @endif
+                                    @endhasanyrole
                                 </div>
                             </div>
                         <?php }else{ ?>

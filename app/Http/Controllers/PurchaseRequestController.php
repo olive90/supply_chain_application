@@ -26,6 +26,8 @@ class PurchaseRequestController extends Controller
     public function index(Request $request)
     {
         $data = array();
+        $vendorData = array();
+        $prRequest = array();
         $response = Http::get('localhost:3000/getblocks');
         $data = $response->json();
         
@@ -53,9 +55,34 @@ class PurchaseRequestController extends Controller
             $allData = array_values($allData);
         }
 
-        // echo '<pre>';print_r($allData);die;
+        $chkrole = $request->user()->hasRole('Vendor'); 
+        if($chkrole)
+        {
+            $pr_id = PurchaseRequestMaster::select('puchase_request_master.pr_id')
+                                            ->join('vendors as v','v.category','=','puchase_request_master.category')
+                                            ->where('v.userid', $request->user()->id)
+                                            ->get();
+
+            foreach($allData as $prDataKey => $prData){
+                foreach($pr_id as $pridKey => $prid){
+                    if($prData['Key'] == $prid['pr_id'] && $prData['Record']['PRStatus'] == 2){
+                        $vendorData[$prDataKey] = $prData;
+                    }
+                }
+            }
+
+            $prRequest = $vendorData;
+        }
+        else
+        {
+            $prRequest =$allData;
+        }
         
-        return view('purchase_request.index', ['allData' => $allData]);
+        
+        // echo '<pre>';print_r($pr_id);die;
+        // echo '<pre>';print_r($prRequest);die;
+        
+        return view('purchase_request.index', ['allData' => $prRequest]);
     }
 
     public function create()
@@ -144,10 +171,12 @@ class PurchaseRequestController extends Controller
         $productInfo = Product::join('categories', 'categories.id', '=', 'products.category')
                                 ->where('products.id', $data['PurchaseOrder']['ItemId'])
                                 ->get();
-
-        // echo '<pre>';print_r($data);die;
         
-        return view('purchase_request.pr_details', ['reqinfo' => $data, 'productinfo' => $productInfo]);   
+        $vendorInfo = Vendor::where('userid', $data['PurchaseOrder']['SupplierId'])->first();
+
+        // echo '<pre>';print_r($vendorInfo->name);die;
+        
+        return view('purchase_request.pr_details', ['reqinfo' => $data, 'productinfo' => $productInfo, 'vendorinfo' => $vendorInfo]);   
     }
 
     public function edit(PurchaseRequest $purchaseRequest)
@@ -165,36 +194,36 @@ class PurchaseRequestController extends Controller
             $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
 
             $response = Http::post('localhost:3000/writews', [
-                "user" => $request->user()->name,
-                "Id" => $key,
-                "DeliveryDate" => $prInfo['PurchaseOrder']['DeliveryDate'],
-                "DeliveredDate" => "",
-                "DeliveryAddress" => $prInfo['PurchaseOrder']['DeliveryAddress'],
-                "ItemId" => $prInfo['PurchaseOrder']['ItemId'],
-                "VendorEstdCost" => "",
-                "PREstdQuantity" => $prInfo['PurchaseOrder']['PREstdQuantity'],
-                "VendorEstdTotalCost" => "",
-                "VendorQuotedate" => "",
-                'OrderDate' => "",
-                "OrderedItemCost" => "",
-                "OrderedQuantity" => "",
-                "OrderedTotalCost" => "",
-                "POApprovedBy" => "",
-                "POApprovedDate" => "",
-                "PONo" => "",
-                "PORequestedBy" => "",
-                "PORequestedDate" => "",
-                "POStatus" => "",
-                "PRApprovedBy" => $request->user()->name,
-                "PRApprovedDate" => date('Y-m-d H:i:s'),
-                "PRNo" => $prInfo['PurchaseOrder']['PRNo'],
-                "PRPurpose" => $prInfo['PurchaseOrder']['PRPurpose'],
-                "PRRequestDate" => $prInfo['PurchaseOrder']['PRRequestDate'],
-                "PRRequestedBy" => $prInfo['PurchaseOrder']['PRRequestedBy'],
-                "PRStatus" => "2",                            //pr approved
-                "SupplierAddress" => "",
-                "SupplierId" => "",
-                "GenStatus" => "2"      //approval
+                "user"                          => $request->user()->name,
+                "Id"                            => $key,
+                "DeliveryDate"                  => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate"                 => $prInfo['PurchaseOrder']['DeliveredDate'],
+                "DeliveryAddress"               => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId"                        => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost"                => $prInfo['PurchaseOrder']['VendorEstdCost'],
+                "PREstdQuantity"                => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost"           => $prInfo['PurchaseOrder']['VendorEstdTotalCost'],
+                "VendorQuotedate"               => $prInfo['PurchaseOrder']['VendorQuotedate'],
+                'OrderDate'                     => $prInfo['PurchaseOrder']['OrderDate'],
+                "OrderedItemCost"               => $prInfo['PurchaseOrder']['OrderedItemCost'],
+                "OrderedQuantity"               => $prInfo['PurchaseOrder']['OrderedQuantity'],
+                "OrderedTotalCost"              => $prInfo['PurchaseOrder']['OrderedTotalCost'],
+                "POApprovedBy"                  => $prInfo['PurchaseOrder']['POApprovedBy'],
+                "POApprovedDate"                => $prInfo['PurchaseOrder']['POApprovedDate'],
+                "PONo"                          => $prInfo['PurchaseOrder']['PONo'],
+                "PORequestedBy"                 => $prInfo['PurchaseOrder']['PORequestedBy'],
+                "PORequestedDate"               => $prInfo['PurchaseOrder']['PORequestedDate'],
+                "POStatus"                      => $prInfo['PurchaseOrder']['POStatus'],
+                "PRApprovedBy"                  => $request->user()->name,
+                "PRApprovedDate"                => date('Y-m-d H:i:s'),
+                "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus"                      => "2",                                                          //pr approved
+                "SupplierAddress"               => $prInfo['PurchaseOrder']['SupplierAddress'],
+                "SupplierId"                    => $prInfo['PurchaseOrder']['SupplierId'],
+                "GenStatus"                     => "2"                                                          //approval
             ]);
     
             $resp = json_decode($response, true);
@@ -207,15 +236,117 @@ class PurchaseRequestController extends Controller
                 $message = 'Something went wrong. Please try again later.';
                 $status = 'error';
             }
+        }
+        else if($request->pr_quote)
+        {
+            $key = base64_decode($pr_key);
+            $vendor = Vendor::where('userid', $request->user()->id)->first();
+            // return $vendor->address;
+            $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+
+            $response = Http::post('localhost:3000/writews', [
+                "user"                          => $request->user()->name,
+                "Id"                            => $key,
+                "DeliveryDate"                  => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate"                 => $prInfo['PurchaseOrder']['DeliveredDate'],
+                "DeliveryAddress"               => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId"                        => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost"                => $request->unit_cost,
+                "PREstdQuantity"                => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost"           => $request->total_cost,
+                "VendorQuotedate"               => date('Y-m-d H:i:s'),
+                'OrderDate'                     => $prInfo['PurchaseOrder']['OrderDate'],
+                "OrderedItemCost"               => $prInfo['PurchaseOrder']['OrderedItemCost'],
+                "OrderedQuantity"               => $prInfo['PurchaseOrder']['OrderedQuantity'],
+                "OrderedTotalCost"              => $prInfo['PurchaseOrder']['OrderedTotalCost'],
+                "POApprovedBy"                  => $prInfo['PurchaseOrder']['POApprovedBy'],
+                "POApprovedDate"                => $prInfo['PurchaseOrder']['POApprovedDate'],
+                "PONo"                          => $prInfo['PurchaseOrder']['PONo'],
+                "PORequestedBy"                 => $prInfo['PurchaseOrder']['PORequestedBy'],
+                "PORequestedDate"               => $prInfo['PurchaseOrder']['PORequestedDate'],
+                "POStatus"                      => $prInfo['PurchaseOrder']['POStatus'],
+                "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
+                "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
+                "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus"                      => $prInfo['PurchaseOrder']['PRStatus'],                        //pr approved
+                "SupplierAddress"               => $vendor->address,
+                "SupplierId"                    => $request->user()->id,
+                "GenStatus"                     => "4"                                                          //quotation submitted
+            ]);
+    
+            $resp = json_decode($response, true);
+            $resultResponse = empty($resp) ? '001' : $resp;
+
+            if($resultResponse != '001'){
+                $message = 'Quotation submitted successfully.';
+                $status = 'success';
+            }else{
+                $message = 'Something went wrong. Please try again later.';
+                $status = 'error';
+            }
+        }
+
+        return redirect()->route('pr.index')->with($status, $message);
+    }
+
+    public function destroy(Request $request, $pr_key)
+    {
+        $message = '';
+        $status = '';
+        if($request->pr_cancel){
+            $key = base64_decode($pr_key);
+
+            $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+
+            $response = Http::post('localhost:3000/writews', [
+                "user"                          => $request->user()->name,
+                "Id"                            => $key,
+                "DeliveryDate"                  => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate"                 => $prInfo['PurchaseOrder']['DeliveredDate'],
+                "DeliveryAddress"               => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId"                        => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost"                => $prInfo['PurchaseOrder']['VendorEstdCost'],
+                "PREstdQuantity"                => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost"           => $prInfo['PurchaseOrder']['VendorEstdTotalCost'],
+                "VendorQuotedate"               => $prInfo['PurchaseOrder']['VendorQuotedate'],
+                'OrderDate'                     => $prInfo['PurchaseOrder']['OrderDate'],
+                "OrderedItemCost"               => $prInfo['PurchaseOrder']['OrderedItemCost'],
+                "OrderedQuantity"               => $prInfo['PurchaseOrder']['OrderedQuantity'],
+                "OrderedTotalCost"              => $prInfo['PurchaseOrder']['OrderedTotalCost'],
+                "POApprovedBy"                  => $prInfo['PurchaseOrder']['POApprovedBy'],
+                "POApprovedDate"                => $prInfo['PurchaseOrder']['POApprovedDate'],
+                "PONo"                          => $prInfo['PurchaseOrder']['PONo'],
+                "PORequestedBy"                 => $prInfo['PurchaseOrder']['PORequestedBy'],
+                "PORequestedDate"               => $prInfo['PurchaseOrder']['PORequestedDate'],
+                "POStatus"                      => $prInfo['PurchaseOrder']['POStatus'],
+                "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
+                "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
+                "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus"                      => "3",                                                          //pr cancelled
+                "SupplierAddress"               => $prInfo['PurchaseOrder']['SupplierAddress'],
+                "SupplierId"                    => $prInfo['PurchaseOrder']['SupplierId'],
+                "GenStatus"                     => "3"                                                          //cancelled
+            ]);
+    
+            $resp = json_decode($response, true);
+            $resultResponse = empty($resp) ? '001' : $resp;
+
+            if($resultResponse != '001'){
+                $message = 'Purchase request canceled successfully.';
+                $status = 'success';
+            }else{
+                $message = 'Something went wrong. Please try again later.';
+                $status = 'error';
+            }
 
             return redirect()->route('pr.index')->with($status, $message);
         }
-        
-    }
-
-    public function destroy(PurchaseRequest $purchaseRequest)
-    {
-        //
     }
 
     public function getProduct(Request $request)

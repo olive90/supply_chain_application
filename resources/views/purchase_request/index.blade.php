@@ -67,10 +67,15 @@
                                     <th>Status</th>
                                     <th>Approved By</th>
                                     <th>Supplier Quotation Status</th>
-                                    @hasrole('Maker-Cheker')
+                                    @hasrole('Vendor')
+                                    <th>Action</th>
+                                    @endhasrole
+                                    @hasrole('Checker')
                                     <th>Approval</th>
                                     @endhasrole
+                                    @hasanyrole('Checker|User')
                                     <th>Action</th>
+                                    @endhasanyrole
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,8 +98,10 @@
                                         <td>{{ $value['Record']['DeliveryDate'] }}</td>
                                         @if ($value['Record']['PRStatus'] == 1)
                                             <td style="color: red; font-weight: 600;">Pending Approval</td>
-                                        @else
+                                        @elseif($value['Record']['PRStatus'] == 2)
                                             <td style="color: green; font-weight: 600;">Approved</td>
+                                        @elseif($value['Record']['PRStatus'] == 3)
+                                            <td style="color: red; font-weight: 600;">Cancelled</td>
                                         @endif
                                         <td>
                                             @if ($value['Record']['PRApprovedBy'] != '')
@@ -105,9 +112,20 @@
                                         @if (empty($value['Record']['VendorEstdCost']))
                                             <td style="color: rgb(255, 102, 0); font-weight: 600;">No quotation</td>
                                             @else
-                                            <td style="color: rgb(21, 218, 21); font-weight: 600;">Quoted</td>
+                                            <td style="color: rgb(21, 218, 21); font-weight: 600;">Quotation Submitted</td>
                                         @endif
-                                        @hasrole('Maker-Cheker')
+                                        @hasrole('Vendor')
+                                        @if (empty($value['Record']['VendorEstdCost']))
+                                            <td>
+                                                <a href="{{ route('pr.show', $pr_key) }}" target="_blank" class="btn btn-outline-primary">
+                                                    Submit Quotation
+                                                </a>
+                                            </td>
+                                            @else
+                                            <td></td>
+                                        @endif
+                                        @endhasrole
+                                        @hasrole('Checker')
                                         <td>
                                             <form action="{{ route('pr.update',$pr_key) }}" method="POST">
                                                 @csrf
@@ -119,7 +137,20 @@
                                             </form>
                                         </td>
                                         @endhasrole
-                                        <td><button class="btn btn-outline-danger">Cancel</button></td>
+                                        @hasanyrole('Checker|User')
+                                        <td>
+                                            <form action="{{ route('pr.destroy',$pr_key) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <?php 
+                                                    if($value['Record']['PONo'] == '' && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <button type="submit" name="pr_cancel" class="btn btn-outline-danger">Cancel</button>
+                                                    <input type="hidden" name="pr_cancel" value="pr_cancel">
+                                                <?php } ?>
+                                            </form>
+                                        </td>
+                                        @endhasanyrole
                                     </tr>
                                 <?php
                                         }

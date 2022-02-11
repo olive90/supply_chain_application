@@ -58,6 +58,7 @@
                             <th>Role</th>
                             <th>Status</th>
                             <th>Create Date</th>
+                            <th>Network Permission</th>
                             <th width="100px">Action</th>
                         </tr>
                         </thead>
@@ -87,6 +88,19 @@
                                         <?php } ?>
                                     </td>
                                     <td>{{ $user['created_at'] }}</td>
+                                    <td>
+                                      <form action="{{ route('user.destroy',$user['id']) }}" method="POST">
+                                          @csrf
+                                          @method('DELETE')
+                                          <?php if($user['write_permission'] == 1){ ?>
+                                              <button type="submit" name="revoke" class="btn btn-outline-success">Invoked</button>
+                                              <input type="hidden" name="revoke" value="revoke">
+                                          <?php }else{ ?>
+                                              <button type="submit" name="invoke" class="btn btn-outline-danger">Revoked</button>
+                                              <input type="hidden" name="invoke" value="invoke">
+                                          <?php } ?>
+                                      </form>
+                                    </td>
                                     <td>
                                         <form action="{{ route('user.destroy',$user['id']) }}" method="POST">
    

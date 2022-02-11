@@ -65,7 +65,11 @@
                                     <th>Request Date & Time</th>
                                     <th>Expected Delivery Date</th>
                                     <th>Status</th>
+                                    <th>Approved By</th>
                                     <th>Supplier Quotation Status</th>
+                                    @hasrole('Maker-Cheker')
+                                    <th>Approval</th>
+                                    @endhasrole
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -92,11 +96,29 @@
                                         @else
                                             <td style="color: green; font-weight: 600;">Approved</td>
                                         @endif
+                                        <td>
+                                            @if ($value['Record']['PRApprovedBy'] != '')
+                                                <p><strong>{{ $value['Record']['PRApprovedBy'] }}</strong></p>
+                                                <p>Date: {{ $value['Record']['PRApprovedDate'] }}</p>
+                                            @endif
+                                        </td>
                                         @if (empty($value['Record']['VendorEstdCost']))
                                             <td style="color: rgb(255, 102, 0); font-weight: 600;">No quotation</td>
                                             @else
                                             <td style="color: rgb(21, 218, 21); font-weight: 600;">Quoted</td>
                                         @endif
+                                        @hasrole('Maker-Cheker')
+                                        <td>
+                                            <form action="{{ route('pr.update',$pr_key) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <?php if($value['Record']['PRApprovedBy'] == ''){ ?>
+                                                    <button type="submit" name="pr_approve" class="btn btn-outline-primary">Approve</button>
+                                                    <input type="hidden" name="pr_approve" value="pr_approve">
+                                                <?php } ?>
+                                            </form>
+                                        </td>
+                                        @endhasrole
                                         <td><button class="btn btn-outline-danger">Cancel</button></td>
                                     </tr>
                                 <?php

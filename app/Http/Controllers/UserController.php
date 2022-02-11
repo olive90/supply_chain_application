@@ -83,7 +83,7 @@ class UserController extends Controller
 
         $user->assignRole($request->input('roles'));
 
-        Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
+        // Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
   
         return redirect()->route('user.index')
                         ->with('success','User updated successfully');
@@ -93,15 +93,76 @@ class UserController extends Controller
     {
         $message = '';
         if($request->lock){
-            DB::table('users')
-                ->where('id', $id)
-                ->update(['status' => 0]);
+            $user = User::find($id);
+            $user->update(['status' => 0, 'write_permission' => 0]);
+            // return $user;
+            $res = Http::post('localhost:3000/registeruser', ["username"=>"appUser"]);
+            // echo '<pre>';print_r($res);die;
             $message = $request->lock . 'ed';
-        }else{
-            DB::table('users')
-                ->where('id', $id)
-                ->update(['status' => 1]);
+        }else if($request->unlock)
+        {
+            $user = User::find($id);
+            $user->update(['status' => 1, 'write_permission' => 1]);
+            // return $user;
+
+            $res = Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
+            // echo '<pre>';print_r($res);die;
+
             $message = $request->unlock . 'ed';
+        }else if($request->revoke){
+            $user = User::find($id);
+            $user->update(['write_permission' => 0]);
+
+            $res = Http::post('localhost:3000/registeruser', ["username"=>"appUser"]);
+            // echo '<pre>';print_r($res);die;
+            if(!empty($res)){
+                $message = $request->revoke . 'ed from blockchain network';
+            }else{
+                $message = 'Smething went wrong. Please try again later.';
+            }
+        }else if($request->invoke){
+            $user = User::find($id);
+            $user->update(['write_permission' => 1]);
+
+            $res = Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
+            // echo '<pre>';print_r($res);die;
+            if(!empty($res)){
+                $message = 'invoked in blockchain network';
+            }else{
+                $message = 'Smething went wrong. Please try again later.';
+            }
+        }else{
+            $message = 'Smething went wrong. Please try again later.';
+        }
+  
+        return redirect()->route('user.index')
+                        ->with('success',"User $message successfully");
+    }
+
+    public function writeAccess(Request $request, $id){
+        $message = '';
+        if($request->revoke){
+            $user = User::find($id);
+            $user->update(['write_permission' => 0]);
+
+            $res = Http::post('localhost:3000/registeruser', ["username"=>""]);
+            // echo '<pre>';print_r($res);die;
+            if(!empty($res)){
+                $message = $request->revoke . 'ed from blockchain network';
+            }else{
+                $message = 'Smething went wrong. Please try again later.';
+            }
+        }else{
+            $user = User::find($id);
+            $user->update(['write_permission' => 1]);
+
+            $res = Http::post('localhost:3000/registeruser', ["username"=>$user->name]);
+            // echo '<pre>';print_r($res);die;
+            if(!empty($res)){
+                $message = 'invoked in blockchain network';
+            }else{
+                $message = 'Smething went wrong. Please try again later.';
+            }
         }
   
         return redirect()->route('user.index')

@@ -56,20 +56,24 @@
                                         <table class="table">
                                             <tbody>
                                               <tr>
-                                                <th scope="row">PRNo</th>
+                                                <th scope="row">PRNo:</th>
                                                 <td>{{ $reqinfo['PurchaseOrder']['PRNo'] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Request Date & Time</th>
+                                                <th scope="row">Request Date & Time:</th>
                                                 <td>{{ $reqinfo['PurchaseOrder']['PRRequestDate'] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Request By</th>
+                                                <th scope="row">Request By:</th>
                                                 <td>{{ $reqinfo['PurchaseOrder']['PRRequestedBy'] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Purpose</th>
+                                                <th scope="row">Purpose:</th>
                                                 <td>{{ $reqinfo['PurchaseOrder']['PRPurpose'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Approved By:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRApprovedBy'] }}</td>
                                               </tr>
                                             </tbody>
                                         </table>
@@ -79,24 +83,28 @@
                                         <table class="table">
                                             <tbody>
                                               <tr>
-                                                <th scope="row">Address Line 1</th>
+                                                <th scope="row">Address Line 1:</th>
                                                 <td>{{ $address[0] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Address Line 2</th>
+                                                <th scope="row">Address Line 2:</th>
                                                 <td>{{ $address[1] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Contact Number</th>
+                                                <th scope="row">Contact Number:</th>
                                                 <td>{{ $address[2] }}</td>
                                               </tr>
                                               <tr>
-                                                <th scope="row">Request Status</th>
+                                                <th scope="row">Request Status:</th>
                                                 @if ($reqinfo['PurchaseOrder']['PRStatus'] == 1)
                                                     <td style="color: red; font-weight: 600;">Pending Approval</td>
                                                 @else
                                                     <td style="color: green; font-weight: 600;">Approved</td>
                                                 @endif
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Approve Date:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PRApprovedDate'] }}</td>
                                               </tr>
                                             </tbody>
                                         </table>

@@ -155,9 +155,62 @@ class PurchaseRequestController extends Controller
         //
     }
 
-    public function update(Request $request, PurchaseRequest $purchaseRequest)
+    public function update(Request $request, $pr_key)
     {
-        //
+        $message = '';
+        $status = '';
+        if($request->pr_approve){
+            $key = base64_decode($pr_key);
+
+            $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+
+            $response = Http::post('localhost:3000/writews', [
+                "user" => $request->user()->name,
+                "Id" => $key,
+                "DeliveryDate" => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate" => "",
+                "DeliveryAddress" => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId" => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost" => "",
+                "PREstdQuantity" => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost" => "",
+                "VendorQuotedate" => "",
+                'OrderDate' => "",
+                "OrderedItemCost" => "",
+                "OrderedQuantity" => "",
+                "OrderedTotalCost" => "",
+                "POApprovedBy" => "",
+                "POApprovedDate" => "",
+                "PONo" => "",
+                "PORequestedBy" => "",
+                "PORequestedDate" => "",
+                "POStatus" => "",
+                "PRApprovedBy" => $request->user()->name,
+                "PRApprovedDate" => date('Y-m-d H:i:s'),
+                "PRNo" => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose" => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRRequestDate" => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy" => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus" => "2",                            //pr approved
+                "SupplierAddress" => "",
+                "SupplierId" => "",
+                "GenStatus" => "2"      //approval
+            ]);
+    
+            $resp = json_decode($response, true);
+            $resultResponse = empty($resp) ? '001' : $resp;
+
+            if($resultResponse != '001'){
+                $message = 'Purchase request approved successfully.';
+                $status = 'success';
+            }else{
+                $message = 'Something went wrong. Please try again later.';
+                $status = 'error';
+            }
+
+            return redirect()->route('pr.index')->with($status, $message);
+        }
+        
     }
 
     public function destroy(PurchaseRequest $purchaseRequest)

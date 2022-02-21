@@ -157,7 +157,7 @@ class PurchaseRequestController extends Controller
                             ->with('success','Purchase request submited successfully.');
         }else{
             return redirect()->route('pr.index')
-                            ->with('error','Something went wrong. Please try again later.');
+                            ->with('error','Permission denied. Please contact to your administrator.');
         }
     }
 
@@ -217,7 +217,7 @@ class PurchaseRequestController extends Controller
                 "PRApprovedBy"                  => $request->user()->name,
                 "PRApprovedDate"                => date('Y-m-d H:i:s'),
                 "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
-                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRPurpose"                     => isset($prInfo['PurchaseOrder']['PRPurpose'])?$prInfo['PurchaseOrder']['PRPurpose']:'',
                 "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
                 "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
                 "PRStatus"                      => "2",                                                          //pr approved
@@ -233,7 +233,7 @@ class PurchaseRequestController extends Controller
                 $message = 'Purchase request approved successfully.';
                 $status = 'success';
             }else{
-                $message = 'Something went wrong. Please try again later.';
+                $message = 'Permission denied. Please contact to your administrator.';
                 $status = 'error';
             }
         }
@@ -268,7 +268,7 @@ class PurchaseRequestController extends Controller
                 "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
                 "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
                 "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
-                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRPurpose"                     => isset($prInfo['PurchaseOrder']['PRPurpose'])?$prInfo['PurchaseOrder']['PRPurpose']:'',
                 "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
                 "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
                 "PRStatus"                      => $prInfo['PurchaseOrder']['PRStatus'],                        //pr approved
@@ -284,7 +284,60 @@ class PurchaseRequestController extends Controller
                 $message = 'Quotation submitted successfully.';
                 $status = 'success';
             }else{
-                $message = 'Something went wrong. Please try again later.';
+                $message = 'Permission denied. Please contact to your administrator.';
+                $status = 'error';
+            }
+        }
+        else if($request->po_submit)
+        {
+            $key = base64_decode($pr_key);
+            $vendor = Vendor::where('userid', $request->user()->id)->first();
+            // return $vendor->address;
+            $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+
+            $po_no = 'PO' . rand(9999999999, 1000000000);
+
+            $response = Http::post('localhost:3000/writews', [
+                "user"                          => $request->user()->name,
+                "Id"                            => $key,
+                "DeliveryDate"                  => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate"                 => $prInfo['PurchaseOrder']['DeliveredDate'],
+                "DeliveryAddress"               => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId"                        => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost"                => $prInfo['PurchaseOrder']['VendorEstdCost'],
+                "PREstdQuantity"                => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost"           => $prInfo['PurchaseOrder']['VendorEstdTotalCost'],
+                "VendorQuotedate"               => $prInfo['PurchaseOrder']['VendorQuotedate'],
+                'OrderDate'                     => $prInfo['PurchaseOrder']['OrderDate'],
+                "OrderedItemCost"               => $prInfo['PurchaseOrder']['OrderedItemCost'],
+                "OrderedQuantity"               => $prInfo['PurchaseOrder']['OrderedQuantity'],
+                "OrderedTotalCost"              => $prInfo['PurchaseOrder']['OrderedTotalCost'],
+                "POApprovedBy"                  => $prInfo['PurchaseOrder']['POApprovedBy'],
+                "POApprovedDate"                => $prInfo['PurchaseOrder']['POApprovedDate'],
+                "PONo"                          => $po_no,
+                "PORequestedBy"                 => $request->user()->name,
+                "PORequestedDate"               => date('Y-m-d H:i:s'),
+                "POStatus"                      => "1",                                                         //PO submitted
+                "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
+                "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
+                "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose"                     => isset($prInfo['PurchaseOrder']['PRPurpose'])?$prInfo['PurchaseOrder']['PRPurpose']:'',
+                "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus"                      => $prInfo['PurchaseOrder']['PRStatus'],                        //pr approved
+                "SupplierAddress"               => $prInfo['PurchaseOrder']['SupplierAddress'],
+                "SupplierId"                    => $prInfo['PurchaseOrder']['SupplierId'],
+                "GenStatus"                     => "5"                                                          //quotation submitted
+            ]);
+    
+            $resp = json_decode($response, true);
+            $resultResponse = empty($resp) ? '001' : $resp;
+
+            if($resultResponse != '001'){
+                $message = 'Purchase Order submitted successfully.';
+                $status = 'success';
+            }else{
+                $message = 'Permission denied. Please contact to your administrator.';
                 $status = 'error';
             }
         }
@@ -325,7 +378,7 @@ class PurchaseRequestController extends Controller
                 "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
                 "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
                 "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
-                "PRPurpose"                     => $prInfo['PurchaseOrder']['PRPurpose'],
+                "PRPurpose"                     => isset($prInfo['PurchaseOrder']['PRPurpose'])?$prInfo['PurchaseOrder']['PRPurpose']:'',
                 "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
                 "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
                 "PRStatus"                      => "3",                                                          //pr cancelled
@@ -341,7 +394,7 @@ class PurchaseRequestController extends Controller
                 $message = 'Purchase request canceled successfully.';
                 $status = 'success';
             }else{
-                $message = 'Something went wrong. Please try again later.';
+                $message = 'Permission denied. Please contact to your administrator.';
                 $status = 'error';
             }
 

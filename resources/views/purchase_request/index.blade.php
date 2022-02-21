@@ -58,6 +58,18 @@
                         <table class="table table-bordered data-table">
                             <thead>
                                 <tr>
+                                    @hasrole('Vendor')
+                                    <th>Action</th>
+                                    @endhasrole
+                                    @hasanyrole('Checker|User')
+                                    <th>Action</th>
+                                    @endhasanyrole
+                                    @hasanyrole('Checker|User')
+                                    <th>Purchase Order</th>
+                                    @endhasanyrole
+                                    @hasrole('Checker')
+                                    <th>Approval</th>
+                                    @endhasrole
                                     <th>SL#</th>
                                     <th>PRNo</th>
                                     <th>Purpose</th>
@@ -67,15 +79,6 @@
                                     <th>Status</th>
                                     <th>Approved By</th>
                                     <th>Supplier Quotation Status</th>
-                                    @hasrole('Vendor')
-                                    <th>Action</th>
-                                    @endhasrole
-                                    @hasrole('Checker')
-                                    <th>Approval</th>
-                                    @endhasrole
-                                    @hasanyrole('Checker|User')
-                                    <th>Action</th>
-                                    @endhasanyrole
                                 </tr>
                             </thead>
                             <tbody>
@@ -86,13 +89,66 @@
                                         $pr_key = base64_encode($value['Key']);
                                 ?>
                                     <tr>
+                                        @hasrole('Vendor')
+                                        @if (empty($value['Record']['VendorEstdCost']))
+                                            <td>
+                                                <a href="{{ route('pr.show', $pr_key) }}" target="_blank" class="btn btn-outline-primary">
+                                                    Submit Quotation
+                                                </a>
+                                            </td>
+                                            @else
+                                            <td></td>
+                                        @endif
+                                        @endhasrole
+                                        @hasanyrole('Checker|User')
+                                        <td>
+                                            <form action="{{ route('pr.destroy',$pr_key) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <?php 
+                                                    if($value['Record']['PONo'] == '' && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <button type="submit" name="pr_cancel" class="btn btn-outline-danger">Cancel</button>
+                                                    <input type="hidden" name="pr_cancel" value="pr_cancel">
+                                                <?php } ?>
+                                            </form>
+                                        </td>
+                                        @endhasanyrole
+                                        @hasanyrole('Checker|User')
+                                        <td>
+                                            <form action="{{ route('pr.update',$pr_key) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <?php 
+                                                    if($value['Record']['GenStatus'] == 4 && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <button type="submit" name="po_submit" class="btn btn-outline-primary">Submit PO</button>
+                                                    <input type="hidden" name="po_submit" value="po_submit">
+                                                <?php }else { ?>
+                                                    <strong style="color: rgb(21, 218, 21); font-weight: 600;">Submitted</strong>
+                                                <?php } ?>
+                                            </form>
+                                        </td>
+                                        @endhasanyrole
+                                        @hasrole('Checker')
+                                        <td>
+                                            <form action="{{ route('pr.update',$pr_key) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <?php if($value['Record']['PRApprovedBy'] == ''){ ?>
+                                                    <button type="submit" name="pr_approve" class="btn btn-outline-primary">Approve</button>
+                                                    <input type="hidden" name="pr_approve" value="pr_approve">
+                                                <?php } ?>
+                                            </form>
+                                        </td>
+                                        @endhasrole
                                         <td>{{ $i++ }}</td>
                                         <td>
                                             <a href="{{ route('pr.show', $pr_key) }}" target="_blank">
                                                 {{ $value['Record']['PRNo'] }}
                                             </a>
                                         </td>
-                                        <td>{{ $value['Record']['PRPurpose'] }}</td>
+                                        <td>{{ isset($value['Record']['PRPurpose'])?$value['Record']['PRPurpose']:'' }}</td>
                                         <td>{{ $value['Record']['PRRequestedBy'] }}</td>
                                         <td>{{ $value['Record']['PRRequestDate'] }}</td>
                                         <td>{{ $value['Record']['DeliveryDate'] }}</td>
@@ -114,43 +170,6 @@
                                             @else
                                             <td style="color: rgb(21, 218, 21); font-weight: 600;">Quotation Submitted</td>
                                         @endif
-                                        @hasrole('Vendor')
-                                        @if (empty($value['Record']['VendorEstdCost']))
-                                            <td>
-                                                <a href="{{ route('pr.show', $pr_key) }}" target="_blank" class="btn btn-outline-primary">
-                                                    Submit Quotation
-                                                </a>
-                                            </td>
-                                            @else
-                                            <td></td>
-                                        @endif
-                                        @endhasrole
-                                        @hasrole('Checker')
-                                        <td>
-                                            <form action="{{ route('pr.update',$pr_key) }}" method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <?php if($value['Record']['PRApprovedBy'] == ''){ ?>
-                                                    <button type="submit" name="pr_approve" class="btn btn-outline-primary">Approve</button>
-                                                    <input type="hidden" name="pr_approve" value="pr_approve">
-                                                <?php } ?>
-                                            </form>
-                                        </td>
-                                        @endhasrole
-                                        @hasanyrole('Checker|User')
-                                        <td>
-                                            <form action="{{ route('pr.destroy',$pr_key) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <?php 
-                                                    if($value['Record']['PONo'] == '' && $value['Record']['PRStatus'] != 3){
-                                                ?>
-                                                    <button type="submit" name="pr_cancel" class="btn btn-outline-danger">Cancel</button>
-                                                    <input type="hidden" name="pr_cancel" value="pr_cancel">
-                                                <?php } ?>
-                                            </form>
-                                        </td>
-                                        @endhasanyrole
                                     </tr>
                                 <?php
                                         }

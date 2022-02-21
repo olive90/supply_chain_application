@@ -69,7 +69,7 @@
                                               </tr>
                                               <tr>
                                                 <th scope="row">Purpose:</th>
-                                                <td>{{ $reqinfo['PurchaseOrder']['PRPurpose'] }}</td>
+                                                <td>{{ isset($reqinfo['PurchaseOrder']['PRPurpose'])?$reqinfo['PurchaseOrder']['PRPurpose']:'' }}</td>
                                               </tr>
                                               <tr>
                                                 <th scope="row">Approved By:</th>
@@ -170,21 +170,21 @@
                                             <div class="col-xs-12 col-sm-12 col-md-12">
                                                 <div class="form-group">
                                                     <strong>Quantity</strong>
-                                                    <input type="text" name="qty" class="form-control" value="{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}" readonly>
+                                                    <input type="text" name="qty" id="qty" class="form-control" value="{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}" readonly>
                                                 </div>
                                             </div>
 
                                             <div class="col-xs-12 col-sm-12 col-md-12">
                                                 <div class="form-group">
                                                     <strong>Per Unit Cost</strong>
-                                                    <input type="text" name="unit_cost" class="form-control">
+                                                    <input type="text" name="unit_cost" class="form-control" onkeyup="calculateTotal(this.value)">
                                                 </div>
                                             </div>
 
                                             <div class="col-xs-12 col-sm-12 col-md-12">
                                                 <div class="form-group">
                                                     <strong>Total Cost</strong>
-                                                    <input type="text" name="total_cost" class="form-control">
+                                                    <input type="text" name="total_cost" id="total_cost" class="form-control" readonly>
                                                 </div>
                                             </div>
 
@@ -253,6 +253,55 @@
                                     @endhasanyrole
                                 </div>
                             </div>
+                            <br><br><br>
+                            <div class="col-md-12">
+                                <h4><u> #Purchase Order Details</u></h4>
+                                <div class="row">
+                                    <div class="col-xs-6 col-sm-6 col-md-6">
+                                        <table class="table">
+                                            <thead></thead>
+                                            <tbody>
+                                              <tr>
+                                                <th scope="row">PONo:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PONo'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Request Date & Time:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PORequestedDate'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Request By:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['PORequestedBy'] }}</td>
+                                              </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="col-xs-6 col-sm-6 col-md-6">
+                                        <table class="table">
+                                            <thead></thead>
+                                            <tbody>
+                                              <tr>
+                                                <th scope="row">PO Status:</th>
+                                                @if ($reqinfo['PurchaseOrder']['POStatus'] == 1)
+                                                    <td style="color: rgb(182, 135, 7); font-weight: 600;">Ordered</td>
+                                                @elseif($reqinfo['PurchaseOrder']['POStatus'] == 2)
+                                                    <td style="color: green; font-weight: 600;">Approved</td>
+                                                @endif
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">PO Approved By:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['POApprovedBy'] }}</td>
+                                              </tr>
+                                              <tr>
+                                                <th scope="row">Approve Date:</th>
+                                                <td>{{ $reqinfo['PurchaseOrder']['POApprovedDate'] }}</td>
+                                              </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         <?php }else{ ?>
                             <div class="text-center"><h4 style="color: red;">No Data Found</h4></div>
                         <?php } ?>
@@ -272,3 +321,11 @@
 <!-- /.content-wrapper -->
 
 @endsection 
+
+<script>
+    function calculateTotal(val){
+        qty = parseFloat(document.getElementById("qty").value);
+            if(isNaN(qty)){ qty = 0; }
+        document.getElementById("total_cost").value = parseFloat(qty * val);
+    }
+</script>

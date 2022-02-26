@@ -111,9 +111,9 @@ class UserController extends Controller
             $message = $request->unlock . 'ed';
         }else if($request->revoke){
             $user = User::find($id);
-            $user->update(['write_permission' => 0]);
+            $user->update(['write_permission' => 2]);
 
-            $res = Http::post('localhost:3000/registeruser', ["username"=>"appUser"]);
+            $res = Http::post('localhost:3000/removeuser', ["requester"=>$request->user()->name, "username"=>"appUser"]);
             // echo '<pre>';print_r($res);die;
             if(!empty($res)){
                 $message = $request->revoke . 'ed from blockchain network';

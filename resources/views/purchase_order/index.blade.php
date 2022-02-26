@@ -10,12 +10,12 @@
     <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
-        <h1 class="m-0">Purchase Request</h1>
+        <h1 class="m-0">Purchase Order</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-            <li class="breadcrumb-item active">Purchase Request</li>
+            <li class="breadcrumb-item active">Purchase Order</li>
         </ol>
         </div><!-- /.col -->
     </div><!-- /.row -->
@@ -32,12 +32,7 @@
                   <div class="card-header">
                       <div class="d-flex justify-content-between">
                           <div>
-                              <h3 class="card-title">Purchase Request Summary</h3>
-                          </div>
-                          <div>
-                            @hasrole('User')
-                                <a class="btn btn-outline-primary" href="{{ route('pr.create') }}"> Make New Request</a>
-                            @endhasrole
+                              <h3 class="card-title">Purchase Order Summary</h3>
                           </div>
                      </div>                      
                   </div>
@@ -79,33 +74,29 @@
                                     <th>PR Status</th>
                                     <th>Approved By</th>
                                     <th>Supplier Quotation Status</th>
+                                    <th>Delivery Status</th>
+                                    <th>Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php 
                                 // echo '<pre>';print_r($allData);die;
                                     $i=1;
-                                    foreach ($allData as $value) {
+                                    foreach ($allData as $dKey => $value) {
                                         $pr_key = base64_encode($value['Key']);
-                                        if(empty($value['Record']['POStatus']) || $value['Record']['POStatus'] != 2){
+                                        if(!empty($value['Record']['POStatus']) && $value['Record']['POStatus'] == 2){
                                 ?>
                                     <tr>
                                         @hasrole('Vendor')
                                             <td>
-                                                @if (empty($value['Record']['VendorEstdCost']))
-                                                <a href="{{ route('pr.show', $pr_key) }}" target="_blank" class="btn btn-outline-primary">
-                                                    Submit Quotation
-                                                </a>
-                                                @endif
-
-                                                <form action="{{ route('pr.update',$pr_key) }}" method="POST">
+                                                <form action="{{ route('purchase-order.update',$pr_key) }}" method="POST">
                                                     @csrf
                                                     @method('PUT')
                                                 <?php 
-                                                    if($value['Record']['POStatus'] == 1 && $value['Record']['PRStatus'] != 3){
+                                                    if(($value['Record']['POStatus'] == 2 && $value['Record']['PRStatus'] != 3) && $value['Record']['GenStatus'] == 6){
                                                 ?>
-                                                    <p><button type="submit" name="po_approve" class="btn btn-outline-primary">Approve PO</button></p>
-                                                    <input type="hidden" name="po_approve" value="po_approve">
+                                                    <p><button type="submit" name="po_delivered" class="btn btn-outline-primary">Delivered</button></p>
+                                                    <input type="hidden" name="po_delivered" value="po_delivered">
                                                 <?php } ?>
                                                 </form>
                                             </td>
@@ -122,6 +113,39 @@
                                                     <input type="hidden" name="pr_cancel" value="pr_cancel">
                                                 <?php } ?>
                                             </form>
+                                            <?php 
+                                                if(isset($remarks) && !empty($remarks)){ 
+                                                    // echo '<pre>';print_r($remarks);die;
+                                                foreach ($remarks as $rKey => $remark) {
+                                                    
+                                                if($remark['pr_id'][$dKey] != $value['Key'][$dKey]){
+                                                    // echo $value['Key'].'/'.$remark['pr_id'];
+                                            ?>
+                                            <form action="{{ route('remarks.create') }}" method="POST" target="_blank">
+                                                @csrf
+                                                @method('GET')
+                                                <?php 
+                                                    if($value['Record']['GenStatus'] == 7 && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <p><button type="submit" name="pr_key" class="btn btn-outline-primary" target="_blank">Remarks</button></p>
+                                                    <input type="hidden" name="pr_key" value="{{ $pr_key }}">
+                                                <?php } ?>
+                                            </form>
+                                            <?php }
+                                                } 
+                                            }else {
+                                            ?>
+                                            <form action="{{ route('remarks.create') }}" method="POST" target="_blank">
+                                                @csrf
+                                                @method('GET')
+                                                <?php 
+                                                    if($value['Record']['GenStatus'] == 7 && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <p><button type="submit" name="pr_key" class="btn btn-outline-primary" target="_blank">Remarks</button></p>
+                                                    <input type="hidden" name="pr_key" value="{{ $pr_key }}">
+                                                <?php } ?>
+                                            </form>
+                                            <?php } ?>
                                         </td>
                                         @endhasanyrole
                                         @hasanyrole('Checker|User')
@@ -152,12 +176,18 @@
                                                     <button type="submit" name="pr_approve" class="btn btn-outline-primary">Approve</button>
                                                     <input type="hidden" name="pr_approve" value="pr_approve">
                                                 <?php } ?>
+                                                <?php 
+                                                    if($value['Record']['POStatus'] == 1 && $value['Record']['PRStatus'] != 3){
+                                                ?>
+                                                    <p><button type="submit" name="po_approve" class="btn btn-outline-primary">Approve PO</button></p>
+                                                    <input type="hidden" name="po_approve" value="po_approve">
+                                                <?php } ?>
                                             </form>
                                         </td>
                                         @endhasrole
                                         <td>{{ $i++ }}</td>
                                         <td>
-                                            <a href="{{ route('pr.show', $pr_key) }}" target="_blank">
+                                            <a href="{{ route('purchase-order.show', $pr_key) }}" target="_blank">
                                                 {{ $value['Record']['PRNo'] }}
                                             </a>
                                         </td>
@@ -183,6 +213,27 @@
                                             @else
                                             <td style="color: rgb(21, 218, 21); font-weight: 600;">Quotation Submitted</td>
                                         @endif
+                                        <td>
+                                            @if(!empty($value['Record']['VendorEstdCost']))
+                                            <strong style="color: rgb(21, 218, 21); font-weight: 600;">Delivered</strong>
+                                            @else
+                                            <strong style="color: rgb(255, 102, 0); font-weight: 600;">Pending</strong>
+                                            @endif
+                                        </td>
+                                        <td>
+                                        <?php
+                                        if(isset($remarks) && !empty($remarks)){  
+                                            foreach ($remarks as $remark) { 
+                                                if($remark['pr_id'] == $value['Key']){
+                                        ?>
+                                                <p><strong>Rating: </strong>{{ $remark['rating'] }}</p>
+                                                <p>{{ $remark['remark'] }}</p>
+                                                <p>By - <strong>{{ $remark['name'] }}</strong></p>
+                                        <?php } 
+                                            }
+                                        }
+                                        ?>
+                                        </td>
                                     </tr>
                                 <?php
                                         }

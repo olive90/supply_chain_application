@@ -2,6 +2,12 @@
 @extends('layouts.sidebar')
 @extends('layouts.navbar')
 
+<style>
+    .checked {
+      color: orange;
+    }
+    </style>
+
 @section('content')
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -10,12 +16,12 @@
         <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-            <h1 class="m-0">Purchase Request Details</h1>
+            <h1 class="m-0">Purchase Order Details</h1>
             </div><!-- /.col -->
             <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
                 <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-                <li class="breadcrumb-item active">Purchase Request Details</li>
+                <li class="breadcrumb-item active">Purchase Order Details</li>
             </ol>
             </div><!-- /.col -->
         </div><!-- /.row -->
@@ -34,10 +40,13 @@
                                 <div>
                                     <h3 class="card-title">Details</h3>
                                 </div>
+                                <div>
+                                    <button class="btn btn-outline-info" onclick="printDiv()">Print</a>
+                                </div>
                             </div>                      
                         </div>
                         <!-- /.card-header -->
-                        <div class="card-body">
+                        <div class="card-body" id="printPO">
                             @if ($message = Session::get('success'))
                                 <div class="alert alert-success">
                                     <p>{{ $message }}</p>
@@ -47,11 +56,22 @@
                                 <?php if(isset($reqinfo) && !empty($reqinfo)){ 
                                     $address = explode(',', $reqinfo['PurchaseOrder']['DeliveryAddress']);
                                     // echo '<pre>';print_r($address);die;
+                                        if(!empty($reqinfo['PurchaseOrder']['DeliveredDate'])){
                                 ?>
-                                    <div class="row">
-                                        <div class="col-xs-12 col-sm-12 col-md-12">
-                                            <h4><u> #Request Info</u></h4>
-                                            <div class="col-xs-6 col-sm-6 col-md-6" style="float: left;">
+                                    <div class="row" style="background-color: grey; color: white; padding-top: 10px;padding-bottom: 10px; font-size: 15pt;">
+                                        <div class="col-xs-6 col-sm-6 col-md-6">
+                                            <strong>Delivered</strong>
+                                        </div>
+                                        <div class="col-xs-6 col-sm-6 col-md-6">
+                                            <strong>Date & Time: </strong>{{ $reqinfo['PurchaseOrder']['DeliveredDate'] }}
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <?php } ?>
+                                    <div class="row" style="margin-top: 15px;">
+                                        <h4><u> #Request Info</u></h4>
+                                        <div class="col-xs-12 col-sm-12 col-md-12 d-flex justify-content-between">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
                                                 <table class="table">
                                                     <tbody>
                                                     <tr>
@@ -76,13 +96,13 @@
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Special Ordering Instructions:</th>
-                                                        <td>{{ $address[3] }}</td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
 
-                                            <div class="col-xs-6 col-sm-6 col-md-6" style="float: left;">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
                                                 <table class="table">
                                                     <tbody>
                                                     <tr>
@@ -113,16 +133,16 @@
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Shipping Instructions:</th>
-                                                        <td>{{ $address[4] }}</td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
                                     </div>
-
+                                    <br>
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-xs-12 col-sm-12 col-md-12">
                                             <h4><u> #Product/Item Details</u></h4>
                                             <table class="table table-bordered data-table">
                                                 <thead>
@@ -156,7 +176,7 @@
                                             </table>
                                         </div>
                                     </div>
-
+                                    <br>
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-12 col-md-12">
                                             <h4><u> #Vendor/Supplier Quotation</u></h4>
@@ -224,7 +244,7 @@
                                                         <td>{{ $p_name }}</td>
                                                         <td>{{ $reqinfo['PurchaseOrder']['PREstdQuantity'] }}</td>
                                                         <td>{{ $reqinfo['PurchaseOrder']['VendorEstdCost'] }}</td>
-                                                        <td>{{ $reqinfo['PurchaseOrder']['VendorEstdTotalCost'] }}</td>
+                                                        <td><strong style="color: green;font-size: 15pt;">{{ $reqinfo['PurchaseOrder']['VendorEstdTotalCost'] }}</strong></td>
                                                         <td>{{ $vendorinfo->name }}</td>
                                                         <td>{{ $reqinfo['PurchaseOrder']['VendorQuotedate'] }}</td>
                                                         <td>{{ $reqinfo['PurchaseOrder']['SupplierAddress'] }}</td>
@@ -267,9 +287,9 @@
                                         @endif
                                         @endhasanyrole
                                     </div>
-
+                                    <br>
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-xs-12 col-sm-12 col-md-12">
                                             <h4><u> #Purchase Order Details</u></h4>
                                             @if (!empty($reqinfo['PurchaseOrder']['POStatus']))
                                                 <div class="col-xs-6 col-sm-6 col-md-6" style="float: left">
@@ -314,10 +334,24 @@
                                                     </table>
                                                 </div>
                                                 @else
-                                                <div class="col-md-12 text-center"><strong style="color: red;">No order placed</strong></div>
+                                                <div class="col-xs-12 col-sm-12 col-md-12 text-center"><strong style="color: red;">No order placed</strong></div>
                                                 @endif
                                         </div>
                                     </div>
+                                    <br><br><br>
+                                    <?php if(!empty($reqinfo['PurchaseOrder']['DeliveredDate'])){ ?>
+                                    <div class="row text-center" style="margin-top: 25px;padding-bottom: 10px;padding-top: 50px;">
+                                        <div class="col-xs-4 col-sm-4 col-md-4">
+                                            <strong><u>Customer Signature</u></strong>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4">
+                                            <strong><u>Delivery Person Signature</u></strong>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4">
+                                            <strong><u>Supplier Signature</u></strong>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
                                     
                                 <?php }else{ ?>
                                     <div class="col-xs-12 col-sm-12 col-md-12 text-center"><h4 style="color: red;">No Data Found</h4></div>
@@ -343,6 +377,22 @@
     function calculateTotal(val){
         qty = parseFloat(document.getElementById("qty").value);
             if(isNaN(qty)){ qty = 0; }
-        document.getElementById("total_cost").value = parseFloat(qty * val).toFixed(2);
+        document.getElementById("total_cost").value = parseFloat(qty * val);
+    }
+
+    function printDiv() {
+        var divToPrint = document.getElementById('printPO');
+        var htmlToPrint = '' +
+            '<style type="text/css">' +
+            'table th, table td {' +
+            'border:1px solid #000;' +
+            'padding:1.0em;' +
+            '}' +
+            '</style>';
+        htmlToPrint += divToPrint.outerHTML;
+        newWin = window.open("");
+        newWin.document.write(htmlToPrint);
+        newWin.print();
+        newWin.close();
     }
 </script>

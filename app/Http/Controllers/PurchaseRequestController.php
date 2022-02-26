@@ -7,11 +7,14 @@ use Illuminate\Http\Request;
 use App\Vendor;
 use App\Product;
 use App\Category;
+use App\Units;
+use App\Remarks;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use App\PurchaseRequestMaster;
 use App\PurchaseRequestDetails;
 use Illuminate\Support\Facades\Http;
+use DB;
 
 class PurchaseRequestController extends Controller
 {
@@ -88,7 +91,9 @@ class PurchaseRequestController extends Controller
     public function create()
     {
         $categories = Category::where('active', 'Y')->get();
-        return view('purchase_request.create', ['categories' => $categories]);
+        $units = Units::get();
+        // echo '<pre>';print_r($units);die;
+        return view('purchase_request.create', ['categories' => $categories, 'units' => $units]);
     }
 
     public function store(Request $request)
@@ -101,6 +106,7 @@ class PurchaseRequestController extends Controller
             'purpose' => 'required',
             'product' => 'required',
             'qty' => 'required',
+            'unit' => 'required'
         ]);
 
         $pr_id = round(microtime(true) * 1000);
@@ -111,10 +117,10 @@ class PurchaseRequestController extends Controller
             "Id" => $pr_id,
             "DeliveryDate" => $request->expected_delivery_date,
             "DeliveredDate" => "",
-            "DeliveryAddress" => $request->address1 . "," . $request->address2 . "," . $request->phone,
+            "DeliveryAddress" => $request->address1 . "," . $request->address2 . "," . $request->phone . "," . $request->ordering_instructions . "," . $request->shipping_instructions,
             "ItemId" => $request->product,
             "VendorEstdCost" => "",
-            "PREstdQuantity" => $request->qty,
+            "PREstdQuantity" => $request->qty .' '.$request->unit,
             "VendorEstdTotalCost" => "",
             "VendorQuotedate" => "",
             'OrderDate' => "",
@@ -174,9 +180,15 @@ class PurchaseRequestController extends Controller
         
         $vendorInfo = Vendor::where('userid', $data['PurchaseOrder']['SupplierId'])->first();
 
-        // echo '<pre>';print_r($vendorInfo->name);die;
+        $rating = Remarks::select(DB::raw('round(AVG(remarks.rating),1) as rating'))
+                            ->join('puchase_request_master', 'puchase_request_master.pr_id', '=', 'remarks.pr_id')
+                            ->join('vendors', 'vendors.category', '=', 'puchase_request_master.category')
+                            ->where('vendors.userid', $data['PurchaseOrder']['SupplierId'])
+                            ->get();
+
+        // echo '<pre>';print_r($rating[0]['rating']);die;
         
-        return view('purchase_request.pr_details', ['reqinfo' => $data, 'productinfo' => $productInfo, 'vendorinfo' => $vendorInfo]);   
+        return view('purchase_request.pr_details', ['reqinfo' => $data, 'productinfo' => $productInfo, 'vendorinfo' => $vendorInfo, 'rating' => $rating]);   
     }
 
     public function edit(PurchaseRequest $purchaseRequest)
@@ -327,7 +339,7 @@ class PurchaseRequestController extends Controller
                 "PRStatus"                      => $prInfo['PurchaseOrder']['PRStatus'],                        //pr approved
                 "SupplierAddress"               => $prInfo['PurchaseOrder']['SupplierAddress'],
                 "SupplierId"                    => $prInfo['PurchaseOrder']['SupplierId'],
-                "GenStatus"                     => "5"                                                          //quotation submitted
+                "GenStatus"                     => "5"                                                          //po submitted
             ]);
     
             $resp = json_decode($response, true);
@@ -340,6 +352,66 @@ class PurchaseRequestController extends Controller
                 $message = 'Permission denied. Please contact to your administrator.';
                 $status = 'error';
             }
+        }
+        else if($request->po_approve)
+        {
+            $key = base64_decode($pr_key);
+            $vendor = Vendor::where('userid', $request->user()->id)->first();
+            // return $vendor->address;
+            $prInfo = Http::post('localhost:3000/queryblock', ["key"=>$key]);
+
+            $po_no = 'PO' . rand(9999999999, 1000000000);
+
+            $response = Http::post('localhost:3000/writews', [
+                "user"                          => $request->user()->name,
+                "Id"                            => $key,
+                "DeliveryDate"                  => $prInfo['PurchaseOrder']['DeliveryDate'],
+                "DeliveredDate"                 => $prInfo['PurchaseOrder']['DeliveredDate'],
+                "DeliveryAddress"               => $prInfo['PurchaseOrder']['DeliveryAddress'],
+                "ItemId"                        => $prInfo['PurchaseOrder']['ItemId'],
+                "VendorEstdCost"                => $prInfo['PurchaseOrder']['VendorEstdCost'],
+                "PREstdQuantity"                => $prInfo['PurchaseOrder']['PREstdQuantity'],
+                "VendorEstdTotalCost"           => $prInfo['PurchaseOrder']['VendorEstdTotalCost'],
+                "VendorQuotedate"               => $prInfo['PurchaseOrder']['VendorQuotedate'],
+                'OrderDate'                     => $prInfo['PurchaseOrder']['OrderDate'],
+                "OrderedItemCost"               => $prInfo['PurchaseOrder']['OrderedItemCost'],
+                "OrderedQuantity"               => $prInfo['PurchaseOrder']['OrderedQuantity'],
+                "OrderedTotalCost"              => $prInfo['PurchaseOrder']['OrderedTotalCost'],
+                "POApprovedBy"                  => $request->user()->name,
+                "POApprovedDate"                => date('Y-m-d H:i:s'),
+                "PONo"                          => $prInfo['PurchaseOrder']['PONo'],
+                "PORequestedBy"                 => $prInfo['PurchaseOrder']['PORequestedBy'],
+                "PORequestedDate"               => $prInfo['PurchaseOrder']['PORequestedDate'],
+                "POStatus"                      => "2",                                                         //PO submitted
+                "PRApprovedBy"                  => $prInfo['PurchaseOrder']['PRApprovedBy'],
+                "PRApprovedDate"                => $prInfo['PurchaseOrder']['PRApprovedDate'],
+                "PRNo"                          => $prInfo['PurchaseOrder']['PRNo'],
+                "PRPurpose"                     => isset($prInfo['PurchaseOrder']['PRPurpose'])?$prInfo['PurchaseOrder']['PRPurpose']:'',
+                "PRRequestDate"                 => $prInfo['PurchaseOrder']['PRRequestDate'],
+                "PRRequestedBy"                 => $prInfo['PurchaseOrder']['PRRequestedBy'],
+                "PRStatus"                      => $prInfo['PurchaseOrder']['PRStatus'],                        //pr approved
+                "SupplierAddress"               => $prInfo['PurchaseOrder']['SupplierAddress'],
+                "SupplierId"                    => $prInfo['PurchaseOrder']['SupplierId'],
+                "GenStatus"                     => "6"                                                          //po approved
+            ]);
+    
+            $resp = json_decode($response, true);
+            $resultResponse = empty($resp) ? '001' : $resp;
+
+            if($resultResponse != '001'){
+                $message = 'Purchase Order approved successfully.';
+                $status = 'success';
+            }else{
+                $message = 'Permission denied. Please contact to your administrator.';
+                $status = 'error';
+            }
+        }
+        else
+        {
+            $message = 'Permission denied. Please contact to your administrator.';
+            $status = 'error';
+            
+            return redirect()->route('/home')->with($status, $message);
         }
 
         return redirect()->route('pr.index')->with($status, $message);
@@ -397,9 +469,16 @@ class PurchaseRequestController extends Controller
                 $message = 'Permission denied. Please contact to your administrator.';
                 $status = 'error';
             }
-
-            return redirect()->route('pr.index')->with($status, $message);
         }
+        else
+        {
+            $message = 'Permission denied. Please contact to your administrator.';
+            $status = 'error';
+            
+            return redirect()->route('/home')->with($status, $message);
+        }
+
+        return redirect()->route('pr.index')->with($status, $message);
     }
 
     public function getProduct(Request $request)

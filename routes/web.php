@@ -27,6 +27,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('products', ProductController::class);
     Route::resource('vendors', VendorController::class);
     Route::resource('pr', PurchaseRequestController::class);
+    Route::resource('purchase-order', PurchaseOrderController::class);
+    Route::resource('remarks', RemarksController::class);
     Route::get('product', 'PurchaseRequestController@getProduct');
     Route::get('product_price', 'PurchaseRequestController@getProductUnitPrice');
     Route::post('write_access', 'UserController@writeAccess')->name('write_access');

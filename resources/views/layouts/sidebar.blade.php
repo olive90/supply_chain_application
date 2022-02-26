@@ -47,7 +47,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="./index3.html" class="nav-link">
+                <a href="{{ url('purchase-order') }}" class="nav-link">
                   <i class="fas fa-arrow-alt-circle-right nav-icon"></i>
                   <p>Purchase Order</p>
                 </a>

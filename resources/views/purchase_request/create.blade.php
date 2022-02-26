@@ -107,6 +107,17 @@
                                                     <input type="text" class="form-control qty" name="qty" id="qty">
                                                 </div>
                                             </div>
+                                            <div class="col-xs-2 col-sm-2 col-md-2" style="float: left;">
+                                                <div class="form-group">
+                                                    <strong><span class="required">*</span> Unit:</strong>
+                                                    <select class="form-control unit" name="unit">
+                                                        <option value="">Select Unit</option>
+                                                        @foreach ($units as $unit)
+                                                        <option value="{{ $unit['unit'] }}">{{ $unit['unit'] }} - {{ $unit['detail'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     

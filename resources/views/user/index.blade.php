@@ -92,11 +92,15 @@
                                       <form action="{{ route('user.destroy',$user['id']) }}" method="POST">
                                           @csrf
                                           @method('DELETE')
-                                          <?php if($user['write_permission'] == 1){ ?>
-                                              <button type="submit" name="revoke" class="btn btn-outline-success">Invoked</button>
+                                          <?php if($user['write_permission'] == 0){ ?>
+                                              <button type="submit" name="revoke" class="btn btn-outline-success">Invoke</button>
+                                              <input type="hidden" name="invoke" value="invoke">
+                                          <?php }else if($user['write_permission'] == 1){?>
+                                            <button type="submit" name="revoke" class="btn btn-outline-danger">Revoke</button>
                                               <input type="hidden" name="revoke" value="revoke">
-                                          <?php }else{ ?>
-                                              <button type="submit" name="invoke" class="btn btn-outline-danger">Revoked</button>
+                                          <?php
+                                            }else{ ?>
+                                              <strong style="color: red">Revoked</strong>
                                               <input type="hidden" name="invoke" value="invoke">
                                           <?php } ?>
                                       </form>
